@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAYSKIY RUNSTORE</title>
+<script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080004;--surface:#120007;--surface-2:#1c0010;--border:rgba(255,255,255,0.07);--text:#fff;--text-dim:rgba(255,255,255,0.62);--text-mute:rgba(255,255,255,0.38);--accent:#a8004d;--accent-bright:#ff2e6e;--accent-glow:rgba(168,0,77,0.45);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(168,0,77,0.18) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 95% 100%,rgba(168,0,77,0.09) 0%,transparent 60%);background-attachment:fixed;}
+.preloader{position:fixed;inset:0;background:#080004;display:flex;align-items:center;justify-content:center;z-index:10000;transition:opacity 0.6s ease,visibility 0.6s ease;background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(168,0,77,0.28) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 95% 100%,rgba(168,0,77,0.12) 0%,transparent 60%);}
+.preloader.hidden{opacity:0;visibility:hidden;}
+.preloader-content{display:flex;flex-direction:column;align-items:center;gap:32px;padding:24px;}
+.preloader-logo{width:84px;height:84px;border-radius:22px;object-fit:cover;background:#1c0010;box-shadow:0 12px 60px rgba(255,46,110,0.55);animation:preloaderFloat 2s ease-in-out infinite;}
+@keyframes preloaderFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-8px) scale(1.04);}}
+.preloader-brand{font-size:14px;font-weight:900;letter-spacing:3px;color:rgba(255,255,255,0.85);text-transform:uppercase;text-align:center;}
+.preloader-brand span{background:linear-gradient(135deg,#ff2e6e,#a8004d);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.preloader-bar-wrap{width:280px;height:3px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden;position:relative;}
+.preloader-bar{position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:3px;background:linear-gradient(90deg,#ff2e6e,#a8004d);box-shadow:0 0 20px rgba(255,46,110,0.8);transition:width 0.35s cubic-bezier(0.22,1,0.36,1);}
+.preloader-percent{font-size:12px;font-weight:700;letter-spacing:2.5px;color:rgba(255,255,255,0.5);text-transform:uppercase;font-variant-numeric:tabular-nums;}
+.settings-screen{position:fixed;inset:0;z-index:9999;background:#080004;display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity 0.5s ease,visibility 0.5s ease;background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(168,0,77,0.22) 0%,transparent 55%);opacity:0;visibility:hidden;overflow-y:auto;}
+.settings-screen.visible{opacity:1;visibility:visible;}
+.settings-box{width:100%;max-width:460px;padding:36px 32px;background:linear-gradient(180deg,rgba(30,0,16,0.75),rgba(15,0,8,0.9));border:1px solid rgba(255,46,110,0.22);border-radius:24px;box-shadow:0 40px 100px rgba(0,0,0,0.65),inset 0 1px 0 rgba(255,255,255,0.05);animation:settingsIn 0.5s cubic-bezier(0.22,1,0.36,1);margin:auto;}
+@keyframes settingsIn{from{opacity:0;transform:translateY(24px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.settings-title{font-size:22px;font-weight:900;margin-bottom:6px;letter-spacing:-0.4px;background:linear-gradient(135deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.settings-sub{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:22px;letter-spacing:0.2px;}
+.settings-group{margin-bottom:18px;}
+.settings-label{font-size:11px;font-weight:700;letter-spacing:1.8px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:8px;display:block;}
+.settings-options{display:flex;gap:8px;flex-wrap:wrap;}
+.settings-option{flex:1;min-width:56px;padding:11px 14px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.02);color:rgba(255,255,255,0.72);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.22s cubic-bezier(0.22,1,0.36,1);text-align:center;}
+.settings-option:hover{border-color:rgba(255,46,110,0.3);background:rgba(255,46,110,0.05);color:#fff;}
+.settings-option.selected{border-color:#ff2e6e;background:rgba(255,46,110,0.14);color:#fff;box-shadow:0 0 0 3px rgba(255,46,110,0.18);}
+.settings-option-currency{font-size:20px;padding:12px 0;font-weight:900;line-height:1;}
+.settings-continue{width:100%;padding:14px;margin-top:12px;border-radius:14px;border:none;background:linear-gradient(135deg,#ff2e6e,#a8004d);color:#fff;font-family:inherit;font-size:15px;font-weight:800;letter-spacing:0.3px;cursor:pointer;transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:0 10px 32px rgba(168,0,77,0.42);}
+.settings-continue:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(255,46,110,0.55);}
+.settings-continue:active{transform:scale(0.98);}
+header{position:sticky;top:0;z-index:100;background:rgba(8,0,4,0.85);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border);}
+.header-inner{max-width:1400px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:relative;}
+.brand{display:flex;align-items:center;gap:11px;flex-shrink:0;}
+.brand-logo{width:38px;height:38px;border-radius:10px;object-fit:cover;background:var(--surface-2);box-shadow:0 4px 16px rgba(168,0,77,0.35);transition:transform 0.3s ease;}
+.brand-logo:hover{transform:scale(1.06);}
+.brand-name{font-weight:900;font-size:16px;letter-spacing:1.2px;white-space:nowrap;}
+.brand-name span{background:linear-gradient(135deg,var(--accent-bright),var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+nav{flex:1;display:flex;gap:3px;flex-wrap:wrap;padding:2px 0;min-width:0;}
+nav button{background:transparent;border:none;color:var(--text-dim);font-family:inherit;font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:9px;cursor:pointer;transition:all 0.22s ease;white-space:nowrap;}
+nav button:hover{color:var(--text);background:rgba(255,255,255,0.05);}
+nav button.active{color:#fff;background:var(--accent);box-shadow:0 4px 22px var(--accent-glow);}
+nav button.cart-btn.has-items{background:rgba(255,46,110,0.15);color:#ff8a8a;border:1px solid rgba(255,46,110,0.4);}
+.settings-btn{width:38px;height:38px;border-radius:10px;flex-shrink:0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s cubic-bezier(0.22,1,0.36,1);}
+.settings-btn:hover{background:rgba(255,46,110,0.15);color:#ff8a8a;border-color:rgba(255,46,110,0.4);transform:rotate(45deg);}
+.settings-btn svg{width:18px;height:18px;}
+body.iface-mobile nav{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(8,0,4,0.98);backdrop-filter:blur(22px);border-bottom:1px solid var(--border);padding:12px 16px;flex-wrap:wrap;gap:6px;box-shadow:0 12px 32px rgba(0,0,0,0.6);animation:navDrop 0.25s cubic-bezier(0.22,1,0.36,1);}
+body.iface-mobile nav.open{display:flex;}
+body.iface-mobile nav button{font-size:13px;padding:8px 14px;}
+body.iface-mobile .brand{cursor:pointer;}
+@keyframes navDrop{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+main{max-width:1400px;margin:0 auto;padding:0 32px;}
+.page{display:none;animation:pageIn 0.55s cubic-bezier(0.22,1,0.36,1);}
+.page.active{display:block;}
+@keyframes pageIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.page-title{padding:40px 0 8px;font-size:clamp(30px,5vw,52px);font-weight:900;letter-spacing:-1.6px;background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.55) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{color:var(--text-dim);font-size:15px;margin-bottom:12px;letter-spacing:0.3px;}
+.embed{width:100%;border:none;display:block;border-radius:22px;overflow:hidden;margin:22px 0;background:transparent;opacity:0;transform:translateY(16px);animation:embedIn 0.7s cubic-bezier(0.22,1,0.36,1) forwards;}
+@keyframes embedIn{to{opacity:1;transform:translateY(0);}}
+.embed-news{height:500px;}.embed-train{height:500px;animation-delay:0.05s;}.embed-runway{height:520px;animation-delay:0.1s;}.embed-clock{height:520px;max-width:560px;margin:22px auto;animation-delay:0.15s;}.embed-ai{height:1450px;animation-delay:0.2s;}
+.widgets-row{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:22px 0;}
+.widgets-row .embed-os{height:500px;margin:0;background:var(--surface);border:1px solid var(--border);border-radius:22px;animation-delay:0.25s;}
+@media(max-width:760px){.widgets-row{grid-template-columns:1fr;}.embed-os{height:420px;}}
+.products-section{margin:52px 0 24px;}
+.products-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding-bottom:18px;margin-bottom:28px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.products-head h2{font-size:clamp(24px,3.5vw,36px);font-weight:900;letter-spacing:-1px;background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.6) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.products-eyebrow{font-size:11.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent-bright);margin-bottom:8px;display:block;}
+.products-meta{font-size:12.5px;color:var(--text-mute);letter-spacing:1px;font-weight:500;display:flex;gap:20px;flex-wrap:wrap;}
+.products-meta span{white-space:nowrap;}
+.products-grid-ms{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;}
+@media(max-width:860px){.products-grid-ms{grid-template-columns:1fr;}}
+.ms-product{position:relative;background:linear-gradient(180deg,rgba(30,0,16,0.55),rgba(15,0,8,0.65));border:1px solid rgba(255,255,255,0.06);border-radius:26px;overflow:hidden;display:flex;flex-direction:column;transition:all 0.4s cubic-bezier(0.22,1,0.36,1);opacity:0;transform:translateY(20px);animation:prodIn 0.6s cubic-bezier(0.22,1,0.36,1) forwards;}
+.ms-product:hover{border-color:rgba(255,46,110,0.35);box-shadow:0 24px 56px rgba(168,0,77,0.22),0 0 0 1px rgba(255,46,110,0.12);transform:translateY(-4px);}
+.ms-product.not-for-sale{opacity:0.75;}
+.ms-product.not-for-sale:hover{transform:none;border-color:rgba(255,255,255,0.06);box-shadow:none;}
+@keyframes prodIn{to{opacity:1;transform:translateY(0);}}
+.ms-product-image{position:relative;aspect-ratio:1.08/1;overflow:hidden;background:radial-gradient(ellipse at center,rgba(168,0,77,0.18) 0%,transparent 70%);display:flex;align-items:center;justify-content:center;padding:26px;}
+.ms-product-image img{width:100%;height:100%;object-fit:contain;transition:transform 0.65s cubic-bezier(0.22,1,0.36,1);filter:drop-shadow(0 16px 40px rgba(0,0,0,0.5));}
+.ms-product:hover .ms-product-image img{transform:scale(1.05) translateY(-4px);}
+.ms-product.not-for-sale:hover .ms-product-image img{transform:none;}
+.ms-product-body{padding:22px 28px 28px;display:flex;flex-direction:column;gap:12px;flex:1;}
+.ms-product-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.ms-product-name{font-size:23px;font-weight:800;letter-spacing:-0.4px;}
+.ms-product-code{font-family:'SF Mono','Courier New',monospace;font-size:11.5px;color:var(--text-dim);letter-spacing:1.8px;padding:3px 9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:7px;font-weight:600;}
+.ms-product-badge{font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:#ff9b9b;background:rgba(180,30,30,0.15);border:1px solid rgba(220,60,60,0.3);padding:5px 10px;border-radius:7px;display:inline-block;margin-top:2px;align-self:flex-start;}
+.ms-product-price{font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.8px;text-shadow:0 0 26px rgba(255,46,110,0.35);margin-top:4px;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;}
+.ms-product-price small{font-size:15px;font-weight:600;color:var(--text-dim);}
+.ms-product-price-note{font-size:10.5px;font-weight:700;color:var(--text-mute);letter-spacing:0.5px;padding:3px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:6px;text-transform:uppercase;}
+.ms-product-price.disabled{color:var(--text-mute);font-size:18px;text-shadow:none;}
+.ms-product-specs{margin-top:6px;border-top:1px solid rgba(255,255,255,0.06);padding-top:14px;}
+.ms-product-specs summary{cursor:pointer;list-style:none;font-size:13px;font-weight:600;color:var(--text-dim);display:flex;align-items:center;justify-content:space-between;padding:4px 0;transition:color 0.2s;user-select:none;}
+.ms-product-specs summary::-webkit-details-marker{display:none;}
+.ms-product-specs summary:hover{color:#fff;}
+.ms-product-specs summary::after{content:'+';font-size:20px;font-weight:300;transition:transform 0.35s cubic-bezier(0.22,1,0.36,1);line-height:1;}
+.ms-product-specs[open] summary::after{transform:rotate(45deg);}
+.ms-product-specs[open] summary{color:#fff;margin-bottom:14px;}
+.ms-product-specs dl{display:flex;flex-direction:column;gap:11px;animation:specOpen 0.35s ease;}
+@keyframes specOpen{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.ms-product-specs dl > div{display:grid;grid-template-columns:105px 1fr;gap:14px;font-size:13px;line-height:1.55;}
+.ms-product-specs dt{color:var(--text-mute);font-weight:600;letter-spacing:0.2px;}
+.ms-product-specs dd{color:var(--text-dim);}
+.btn-add-cart{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:16px;padding:15px 22px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-size:14.5px;font-weight:700;letter-spacing:0.3px;color:#fff;background:linear-gradient(135deg,#ff2e6e 0%,#a8004d 100%);box-shadow:0 8px 24px rgba(168,0,77,0.35);transition:transform 0.35s cubic-bezier(0.22,1,0.36,1),box-shadow 0.35s cubic-bezier(0.22,1,0.36,1),background 0.55s cubic-bezier(0.22,1,0.36,1),border-color 0.55s cubic-bezier(0.22,1,0.36,1);isolation:isolate;-webkit-tap-highlight-color:transparent;}
+.btn-add-cart:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(255,46,110,0.45);}
+.btn-add-cart:active{transform:scale(0.97);transition-duration:0.1s;}
+.btn-add-cart.added{background:linear-gradient(135deg,#1a0010 0%,#2a0020 100%);border:1px solid rgba(255,46,110,0.5);box-shadow:0 8px 24px rgba(168,0,77,0.15),inset 0 0 20px rgba(255,46,110,0.08);}
+.btn-add-cart.just-added{animation:btnSuccessPulse 0.85s cubic-bezier(0.22,1,0.36,1);}
+@keyframes btnSuccessPulse{0%{box-shadow:0 8px 24px rgba(168,0,77,0.35),0 0 0 0 rgba(255,46,110,0.5);}50%{box-shadow:0 8px 24px rgba(168,0,77,0.35),0 0 0 12px rgba(255,46,110,0);}100%{box-shadow:0 8px 24px rgba(168,0,77,0.35),0 0 0 0 rgba(255,46,110,0);}}
+.cart-icon-stack{position:relative;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;z-index:1;}
+.cart-icon-stack svg{position:absolute;inset:0;width:100%;height:100%;transition:transform 0.6s cubic-bezier(0.68,-0.55,0.27,1.55),opacity 0.35s ease;stroke-width:2.2;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;}
+.cart-icon-cart{opacity:1;transform:scale(1) rotate(0deg);}
+.cart-icon-check{opacity:0;transform:scale(0.2) rotate(-180deg);color:#ff2e6e;}
+.btn-add-cart.added .cart-icon-cart{opacity:0;transform:scale(0.2) rotate(180deg);}
+.btn-add-cart.added .cart-icon-check{opacity:1;transform:scale(1) rotate(0deg);color:#ff2e6e;}
+.btn-cart-text{position:relative;z-index:1;}
+.btn-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.45);pointer-events:none;transform:scale(0);opacity:0.8;z-index:0;top:0;left:0;}
+.btn-ripple.animate{animation:btnRipple 0.75s cubic-bezier(0.22,1,0.36,1);}
+@keyframes btnRipple{0%{transform:scale(0);opacity:0.8;}100%{transform:scale(2.6);opacity:0;}}
+.cart-wrap{margin:32px 0 24px;padding:36px;border-radius:26px;background:linear-gradient(180deg,rgba(30,0,16,0.5),rgba(15,0,8,0.7));border:1px solid rgba(255,255,255,0.06);}
+.cart-notice{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;background:rgba(255,190,90,0.08);border:1px solid rgba(255,190,90,0.25);color:#ffd18a;font-size:13px;font-weight:500;line-height:1.5;margin-bottom:24px;}
+.cart-notice-icon{font-size:18px;}
+.cart-empty{text-align:center;padding:64px 24px;}
+.cart-empty h3{font-size:28px;font-weight:900;letter-spacing:-0.6px;margin-bottom:12px;background:linear-gradient(135deg,#fff,rgba(255,255,255,0.55));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.cart-empty p{color:var(--text-dim);font-size:14px;margin-bottom:24px;}
+.btn-back{padding:12px 24px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;font-size:14px;border:none;font-family:inherit;transition:all 0.25s;display:inline-block;cursor:pointer;}
+.btn-back:hover{background:var(--accent-bright);transform:translateY(-2px);}
+.cart-list{display:flex;flex-direction:column;gap:16px;}
+.cart-item{display:grid;grid-template-columns:96px 1fr auto;gap:20px;padding:18px;border-radius:18px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.05);align-items:center;animation:cartIn 0.4s ease;}
+@keyframes cartIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.cart-item-img{width:96px;height:96px;border-radius:14px;background:radial-gradient(ellipse at center,rgba(168,0,77,0.15) 0%,transparent 70%);display:flex;align-items:center;justify-content:center;padding:8px;}
+.cart-item-img img{max-width:100%;max-height:100%;object-fit:contain;}
+.cart-item-body{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.cart-item-name{font-size:17px;font-weight:700;}
+.cart-item-code{font-family:'SF Mono','Courier New',monospace;font-size:11px;color:var(--text-mute);letter-spacing:1.5px;}
+.cart-item-config{font-size:12px;color:var(--text-mute);letter-spacing:0.2px;margin-top:2px;}
+.cart-item-price{font-size:22px;font-weight:900;margin-top:4px;}
+.cart-item-price small{font-size:13px;color:var(--text-dim);margin-left:4px;font-weight:600;}
+.cart-item-actions{display:flex;flex-direction:column;gap:8px;align-items:stretch;}
+.btn-cart-remove{padding:8px 14px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text-dim);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-cart-remove:hover{border-color:rgba(255,46,110,0.4);color:#ff8a8a;}
+.cart-summary{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.cart-total{font-size:15px;color:var(--text-dim);font-weight:500;}
+.cart-total strong{font-size:28px;color:#fff;font-weight:900;margin-left:10px;letter-spacing:-0.6px;text-shadow:0 0 24px rgba(255,46,110,0.35);}
+.btn-cart-checkout{padding:16px 32px;border-radius:14px;border:none;background:linear-gradient(135deg,#ff2e6e,#a8004d);color:#fff;font-family:inherit;font-size:15px;font-weight:800;letter-spacing:0.4px;cursor:pointer;transition:transform 0.3s cubic-bezier(0.22,1,0.36,1),box-shadow 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:0 10px 28px rgba(168,0,77,0.4);}
+.btn-cart-checkout:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(255,46,110,0.5);}
+.btn-cart-checkout:active{transform:scale(0.97);}
+@media(max-width:700px){.cart-wrap{padding:22px 16px;}.cart-item{grid-template-columns:70px 1fr;gap:14px;}.cart-item-img{width:70px;height:70px;}.cart-item-actions{grid-column:1/-1;flex-direction:row;justify-content:flex-end;}.btn-cart-checkout{width:100%;}}
+.modal-overlay{position:fixed;inset:0;background:rgba(2,0,1,0.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;animation:modalFadeIn 0.25s ease;}
+@keyframes modalFadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-window{position:relative;background:linear-gradient(180deg,#0e0006 0%,#080004 100%);border-radius:26px;max-width:1000px;width:100%;padding:44px;box-shadow:0 30px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(255,46,110,0.15);animation:modalSlideIn 0.4s cubic-bezier(0.22,1,0.36,1);margin:auto;}
+@keyframes modalSlideIn{from{opacity:0;transform:translateY(-30px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+.modal-close{position:absolute;top:16px;right:16px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.25s;z-index:10;font-family:inherit;line-height:1;font-weight:300;}
+.modal-close:hover{background:var(--accent);transform:rotate(90deg);border-color:var(--accent);}
+@media(max-width:900px){.modal-window{padding:26px 16px;border-radius:20px;}.modal-overlay{padding:16px 10px;}}
+.co-wrap{width:100%;}
+.co-title{font-size:26px;font-weight:900;margin-bottom:24px;letter-spacing:-0.6px;display:flex;align-items:center;gap:12px;}
+.co-count{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;padding:0 10px;background:linear-gradient(135deg,#ff2e6e,#a8004d);border-radius:999px;font-size:14px;font-weight:900;color:#fff;box-shadow:0 4px 12px rgba(255,46,110,0.4);}
+.co-items{display:flex;flex-direction:column;gap:16px;margin-bottom:24px;}
+.co-item{display:grid;grid-template-columns:110px 1fr;gap:18px;padding:20px;background:linear-gradient(180deg,rgba(30,0,16,0.55),rgba(15,0,8,0.7));border:1px solid rgba(255,255,255,0.07);border-radius:18px;animation:coItemIn 0.4s cubic-bezier(0.22,1,0.36,1);}
+@keyframes coItemIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){.co-item{grid-template-columns:80px 1fr;gap:12px;padding:14px;}}
+.co-item-img{width:110px;height:110px;border-radius:14px;background:radial-gradient(ellipse at center,rgba(168,0,77,0.16) 0%,transparent 70%);display:flex;align-items:center;justify-content:center;padding:10px;}
+@media(max-width:600px){.co-item-img{width:80px;height:80px;padding:6px;}}
+.co-item-img img{max-width:100%;max-height:100%;object-fit:contain;}
+.co-item-body{display:flex;flex-direction:column;gap:16px;min-width:0;}
+.co-item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.co-item-name{font-size:17px;font-weight:800;letter-spacing:-0.2px;}
+.co-item-code{font-family:'SF Mono','Courier New',monospace;font-size:11px;color:var(--text-mute);letter-spacing:1.5px;margin-top:3px;}
+.co-item-price{font-size:22px;font-weight:900;letter-spacing:-0.6px;text-shadow:0 0 20px rgba(255,46,110,0.3);white-space:nowrap;}
+.co-item-section{display:flex;flex-direction:column;gap:8px;}
+.co-item-label{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--text-mute);text-transform:uppercase;}
+.co-memory-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;}
+.co-memory-options .memory-option{cursor:pointer;display:block;position:relative;}
+.co-memory-options .memory-option input{position:absolute;opacity:0;pointer-events:none;}
+.co-memory-options .memory-option-inner{padding:10px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.09);background:rgba(255,255,255,0.02);transition:all 0.25s;display:flex;flex-direction:column;gap:2px;}
+.co-memory-options .memory-option:hover .memory-option-inner{border-color:rgba(255,46,110,0.3);background:rgba(255,46,110,0.04);}
+.co-memory-options .memory-option input:checked + .memory-option-inner{border-color:#ff2e6e;background:rgba(255,46,110,0.1);box-shadow:0 0 0 3px rgba(255,46,110,0.15);}
+.co-memory-options .memory-main{font-size:13.5px;font-weight:800;color:#fff;letter-spacing:-0.2px;}
+.co-memory-options .memory-sub{font-size:10.5px;color:var(--text-dim);font-weight:600;}
+.co-memory-options .memory-extra{font-size:10px;color:#ff8a8a;font-weight:700;margin-top:2px;}
+.co-color-options{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.co-color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;position:relative;transition:transform 0.2s,box-shadow 0.2s;border:2px solid transparent;}
+.co-color-swatch:hover{transform:scale(1.1);}
+.co-color-swatch.selected{box-shadow:0 0 0 2px #ff2e6e,0 0 12px rgba(255,46,110,0.5);border-color:rgba(255,255,255,0.2);}
+.co-color-custom{position:relative;width:32px;height:32px;border-radius:50%;background:conic-gradient(from 0deg,#ff2e6e,#f5af19,#00b4db,#8a2387,#ff2e6e);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;}
+.co-color-custom:hover{transform:scale(1.1);}
+.co-color-custom.selected{box-shadow:0 0 0 2px #ff2e6e,0 0 12px rgba(255,46,110,0.5);}
+.co-color-custom input[type="color"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:none;}
+.co-color-custom svg{width:14px;height:14px;color:#fff;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.6));}
+.co-color-chosen{font-size:11px;color:var(--text-mute);margin-top:4px;}
+.co-color-chosen span{color:#fff;font-weight:700;}
+.co-total-row{padding:24px;background:linear-gradient(135deg,rgba(255,46,110,0.1) 0%,rgba(168,0,77,0.15) 100%);border:1.5px solid rgba(255,46,110,0.3);border-radius:18px;display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+.co-total-label{font-size:14px;color:var(--text-dim);font-weight:600;letter-spacing:0.3px;}
+.co-total-value{font-size:32px;font-weight:900;letter-spacing:-1px;text-shadow:0 0 24px rgba(255,46,110,0.35);}
+.checkout-section{margin-bottom:26px;}
+.checkout-label{display:block;font-size:12px;font-weight:700;letter-spacing:1.5px;color:var(--text-mute);text-transform:uppercase;margin-bottom:12px;}
+.field{width:100%;padding:13px 16px;border-radius:12px;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.09);color:#fff;font-family:inherit;font-size:14px;transition:all 0.2s;outline:none;}
+.field:focus{border-color:#ff2e6e;background:rgba(255,46,110,0.05);box-shadow:0 0 0 3px rgba(255,46,110,0.12);}
+.field::placeholder{color:var(--text-mute);}
+.field-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-top:10px;}
+@media(max-width:520px){.field-row{grid-template-columns:1fr;}}
+.checkbox-wrap{display:flex;align-items:flex-start;gap:12px;padding:16px;border-radius:14px;background:rgba(255,255,255,0.02);border:1.5px solid rgba(255,255,255,0.08);cursor:pointer;transition:all 0.2s;margin-bottom:20px;position:relative;user-select:none;}
+.checkbox-wrap:hover{border-color:rgba(255,46,110,0.3);}
+.checkbox-wrap.checked{border-color:rgba(255,46,110,0.5);background:rgba(255,46,110,0.05);}
+.checkbox-wrap input{position:absolute;opacity:0;width:1px;height:1px;}
+.checkbox-box{width:22px;height:22px;flex-shrink:0;border-radius:6px;border:2px solid rgba(255,255,255,0.25);background:transparent;position:relative;transition:all 0.2s;margin-top:1px;}
+.checkbox-wrap.checked .checkbox-box{background:#ff2e6e;border-color:#ff2e6e;}
+.checkbox-wrap.checked .checkbox-box::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900;}
+.checkbox-text{font-size:13px;line-height:1.5;color:var(--text-dim);}
+.checkbox-text strong{color:#fff;font-weight:700;}
+.checkout-actions{display:flex;flex-direction:column;gap:14px;}
+.btn-buy{width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#ff2e6e,#a8004d);color:#fff;font-family:inherit;font-size:16px;font-weight:800;letter-spacing:0.4px;cursor:pointer;transition:all 0.3s cubic-bezier(0.22,1,0.36,1);box-shadow:0 10px 32px rgba(168,0,77,0.4);}
+.btn-buy:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 16px 40px rgba(255,46,110,0.5);}
+.btn-buy:disabled{opacity:0.4;cursor:not-allowed;box-shadow:none;}
+.btn-buy.loading{pointer-events:none;opacity:0.7;}
+.game-badge{padding:11px 16px;border-radius:12px;background:rgba(168,0,77,0.1);border:1px dashed rgba(255,46,110,0.3);color:#ff8a8a;font-size:11px;font-weight:700;letter-spacing:1.4px;text-align:center;text-transform:uppercase;}
+.success-card{padding:56px 32px;text-align:center;border-radius:20px;background:linear-gradient(180deg,rgba(30,0,16,0.5),rgba(15,0,8,0.7));border:1px solid rgba(255,46,110,0.25);box-shadow:0 0 60px rgba(168,0,77,0.2);}
+.success-icon{width:72px;height:72px;border-radius:50%;margin:0 auto 24px;background:linear-gradient(135deg,#ff2e6e,#a8004d);display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;font-weight:900;box-shadow:0 12px 40px rgba(255,46,110,0.5);animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.success-card h2{font-size:28px;font-weight:900;margin-bottom:12px;background:linear-gradient(135deg,#fff,rgba(255,255,255,0.6));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.success-card p{color:var(--text-dim);font-size:14px;margin-bottom:28px;line-height:1.6;}
+.coming-soon{position:relative;text-align:center;padding:96px 24px;margin:40px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;}
+.coming-soon::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--accent-glow) 0%,transparent 70%);opacity:0.35;pointer-events:none;}
+.coming-soon h2{position:relative;font-size:clamp(56px,12vw,120px);font-weight:900;letter-spacing:-4px;background:linear-gradient(135deg,var(--accent-bright),var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:pulseGlow 3.5s ease-in-out infinite;}
+@keyframes pulseGlow{0%,100%{filter:drop-shadow(0 0 22px var(--accent-glow));}50%{filter:drop-shadow(0 0 46px var(--accent-glow));}}
+.coming-soon .game-note{position:relative;color:var(--text-dim);font-size:13px;font-weight:600;letter-spacing:2.5px;margin-top:20px;text-transform:uppercase;}
+footer.disclaimer{padding:64px 24px 88px;text-align:center;color:var(--text-mute);font-size:13px;line-height:2.1;letter-spacing:1px;border-top:1px solid var(--border);margin-top:48px;}
+footer.disclaimer strong{color:var(--accent-bright);font-weight:700;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+@media(max-width:760px){.header-inner{padding:12px 16px;gap:14px;}main{padding:0 16px;}.brand-name{font-size:14px;}.embed-news,.embed-train{height:440px;}.embed-runway{height:440px;}}
+</style>
+</head>
+<body>
+
+<div class="preloader" id="preloader">
+  <div class="preloader-content">
+    <img class="preloader-logo"
+      src="https://raw.githubusercontent.com/balovzena9-ops/mayrunwaystore/main/%D1%84%D0%BE%D1%82%D0%BE%20%D0%BC%D0%B0%D0%B9%D1%81%D0%B8/myry.jpg"
+      alt="MY"
+      onerror="this.onerror=null;this.style.background='linear-gradient(135deg,#ff2e6e,#a8004d)';this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22><text x=%2240%22 y=%2252%22 font-size=%2240%22 font-family=%22Arial%22 font-weight=%22900%22 fill=%22white%22 text-anchor=%22middle%22>M</text></svg>';">
+    <div class="preloader-brand">MAYSKIY <span>RUNSTORE</span></div>
+    <div class="preloader-bar-wrap"><div class="preloader-bar"></div></div>
+    <div class="preloader-percent">0%</div>
+  </div>
+</div>
+
+<div class="settings-screen" id="settings-screen">
+  <div class="settings-box">
+    <div class="settings-title" id="settings-title">Добро пожаловать</div>
+    <div class="settings-sub" id="settings-sub">Настройте язык и валюту</div>
+    <div class="settings-group">
+      <label class="settings-label" id="settings-lang-label">Язык</label>
+      <div class="settings-options">
+        <button class="settings-option" data-lang="ru">🇷🇺 Русский</button>
+        <button class="settings-option" data-lang="en">🇬🇧 English</button>
+      </div>
+    </div>
+    <div class="settings-group">
+      <label class="settings-label" id="settings-currency-label">Валюта</label>
+      <div class="settings-options">
+        <button class="settings-option settings-option-currency" data-currency="RUB" title="Рубли">₽</button>
+        <button class="settings-option settings-option-currency" data-currency="USD" title="Доллар">$</button>
+        <button class="settings-option settings-option-currency" data-currency="KZT" title="Тенге">₸</button>
+        <button class="settings-option settings-option-currency" data-currency="BYN" title="Белорусские рубли">Br</button>
+      </div>
+    </div>
+    <div class="settings-group">
+      <label class="settings-label" id="settings-iface-label">Интерфейс</label>
+      <div class="settings-options">
+        <button class="settings-option" data-iface="auto" id="iface-auto">Авто</button>
+        <button class="settings-option" data-iface="desktop" id="iface-desktop">ПК</button>
+        <button class="settings-option" data-iface="mobile" id="iface-mobile">Моб.</button>
+      </div>
+    </div>
+    <button class="settings-continue" id="settings-continue">Продолжить</button>
+  </div>
+</div>
+
+<div id="main-app" style="display:none">
+  <header>
+    <div class="header-inner">
+      <div class="brand" id="brand-toggle">
+        <img class="brand-logo"
+          src="https://raw.githubusercontent.com/balovzena9-ops/mayrunwaystore/main/%D1%84%D0%BE%D1%82%D0%BE%20%D0%BC%D0%B0%D0%B9%D1%81%D0%B8/myry.jpg"
+          alt="MAYSKIY RUNSTORE"
+          onerror="this.onerror=null;this.style.background='linear-gradient(135deg,#ff2e6e,#a8004d)';this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><text x=%2220%22 y=%2227%22 font-size=%2220%22 font-family=%22Arial%22 font-weight=%22900%22 fill=%22white%22 text-anchor=%22middle%22>M</text></svg>';">
+        <div class="brand-name">MAYSKIY <span>RUNSTORE</span></div>
+      </div>
+      <nav id="nav"></nav>
+      <button class="settings-btn" id="settings-btn" title="Настройки" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+  </header>
+  <main id="main"></main>
+  <div class="modal-overlay" id="checkout-modal" aria-hidden="true">
+    <div class="modal-window" role="dialog" aria-modal="true">
+      <button class="modal-close" id="modal-close" type="button" aria-label="Close">×</button>
+      <div id="checkout-content"></div>
+    </div>
+  </div>
+</div>
+
+<template id="src-news"><!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>MYRUNSTORE</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+body, html { margin: 0; padding: 0; width: 100%; min-height: 100vh; background: transparent !important; display: flex; justify-content: center; align-items: center; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+.news-container { width: 100%; height: 100vh; min-height: 500px; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+.papers-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: hidden; }
+.paper-line { position: absolute; display: flex; align-items: center; white-space: nowrap; background: rgba(255,255,255,0.08); backdrop-filter: blur(2px); padding: 8px 24px; border-radius: 30px; color: rgba(255,255,255,0.85); font-weight: 700; font-size: 15px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: flyAcross infinite linear; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; }
+.os-fly { position: absolute; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); backdrop-filter: blur(2px); border-radius: 50%; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: flyAcross infinite linear; padding: 5px; }
+.os-fly svg { width: 100%; height: 100%; display: block; }
+@keyframes flyLeft { 0% { transform: translateX(-300px) rotate(-3deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(calc(100vw + 300px)) rotate(3deg); opacity: 0; } }
+@keyframes flyRight { 0% { transform: translateX(calc(100vw + 300px)) rotate(3deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(-300px) rotate(-3deg); opacity: 0; } }
+@keyframes flyTop { 0% { transform: translateY(-300px) rotate(-3deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(calc(100vh + 300px)) rotate(3deg); opacity: 0; } }
+@keyframes flyBottom { 0% { transform: translateY(calc(100vh + 300px)) rotate(3deg); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(-300px) rotate(-3deg); opacity: 0; } }
+.t1 { left: 0%; top: 4%; animation: flyLeft 15s linear infinite; animation-delay: 0s; }
+.t2 { left: 0%; top: 14%; animation: flyRight 17s linear infinite; animation-delay: 2s; }
+.t3 { left: 0%; top: 24%; animation: flyTop 14s linear infinite; animation-delay: 4s; }
+.t4 { left: 0%; top: 34%; animation: flyBottom 16s linear infinite; animation-delay: 1s; }
+.t5 { left: 0%; top: 44%; animation: flyLeft 12s linear infinite; animation-delay: 3s; }
+.t6 { left: 0%; top: 54%; animation: flyRight 18s linear infinite; animation-delay: 0s; }
+.t7 { left: 0%; top: 64%; animation: flyTop 13s linear infinite; animation-delay: 5s; }
+.t8 { left: 0%; top: 74%; animation: flyBottom 15s linear infinite; animation-delay: 2s; }
+.t9 { left: 0%; top: 84%; animation: flyLeft 19s linear infinite; animation-delay: 1s; }
+.t10 { left: 0%; top: 94%; animation: flyRight 11s linear infinite; animation-delay: 3s; }
+.o1 { width: 85px; height: 85px; left: 0%; top: 8%; animation: flyRight 20s linear infinite; animation-delay: 0.5s; }
+.o2 { width: 80px; height: 80px; left: 0%; top: 20%; animation: flyLeft 13s linear infinite; animation-delay: 1.5s; }
+.o3 { width: 95px; height: 95px; left: 0%; top: 30%; animation: flyBottom 21s linear infinite; animation-delay: 2.5s; }
+.o4 { width: 75px; height: 75px; left: 0%; top: 40%; animation: flyTop 15s linear infinite; animation-delay: 3.5s; }
+.o5 { width: 90px; height: 90px; left: 0%; top: 50%; animation: flyLeft 22s linear infinite; animation-delay: 0.5s; }
+.o6 { width: 85px; height: 85px; left: 0%; top: 60%; animation: flyRight 14s linear infinite; animation-delay: 1.5s; }
+.o7 { width: 80px; height: 80px; left: 0%; top: 70%; animation: flyBottom 16s linear infinite; animation-delay: 2.5s; }
+.o8 { width: 75px; height: 75px; left: 0%; top: 80%; animation: flyTop 12s linear infinite; animation-delay: 3.5s; }
+.o9 { width: 90px; height: 90px; left: 0%; top: 90%; animation: flyRight 18s linear infinite; animation-delay: 0.5s; }
+.center-title { position: relative; z-index: 2; font-weight: 900; text-align: center; color: #ffffff; text-shadow: 0px 5px 40px rgba(0,0,0,0.9); font-size: 6vw; letter-spacing: 8px; margin: 0; line-height: 1; max-width: 90%; }
+@media (max-width: 600px) { .paper-line { font-size: 12px; padding: 6px 12px; } .os-fly { width: 55px; height: 55px; } .center-title { font-size: 10vw; letter-spacing: 4px; } }
+</style>
+</head>
+<body>
+<div class="news-container">
+    <div class="papers-layer">
+        <div class="paper-line t1" data-en="📱 MYRUNSTORE: VIKOPhone sales start">📱 MYRUNSTORE: старт продаж VIKOPhone</div>
+        <div class="paper-line t2" data-en="🛡️ OS MY 3: new security system">🛡️ OS MY 3: новая система безопасности</div>
+        <div class="paper-line t3" data-en="📱 BALOPHONE unveiled to the public">📱 BALOPHONE представлен публике</div>
+        <div class="paper-line t4" data-en="🔒 Max app isolated in OS">🔒 Приложение Макс изолировано в ОС</div>
+        <div class="paper-line t5" data-en="⚠️ VIK OS may disappear on Aug 1">⚠️ ОС VIK может исчезнуть 1 августа</div>
+        <div class="paper-line t6" data-en="📲 OS MY 3.00 update available">📲 Обновление OS MY 3.00 уже доступно</div>
+        <div class="paper-line t7" data-en="🖥️ MYRUNSTORE expands its lineup">🖥️ MYRUNSTORE расширяет ассортимент</div>
+        <div class="paper-line t8" data-en="📱 BL: new OS version in development">📱 BL: новая версия ОС уже в разработке</div>
+        <div class="paper-line t9" data-en="🔐 New security system in MYRY">🔐 Новая система безопасности в MYRY</div>
+        <div class="paper-line t10" data-en="📱 MySee+ now on sale">📱 MySee+ поступил в продажу</div>
+        <div class="os-fly o1" id="os1"></div>
+        <div class="os-fly o2" id="os2"></div>
+        <div class="os-fly o3" id="os3"></div>
+        <div class="os-fly o4" id="os4"></div>
+        <div class="os-fly o5" id="os5"></div>
+        <div class="os-fly o6" id="os6"></div>
+        <div class="os-fly o7" id="os7"></div>
+        <div class="os-fly o8" id="os8"></div>
+        <div class="os-fly o9" id="os9"></div>
+    </div>
+    <h1 class="center-title">MYRUNSTORE</h1>
+</div>
+<script>
+var LANG = window.__MRS_LANG__ || 'ru';
+if (LANG === 'en') { document.querySelectorAll('[data-en]').forEach(function(el){ el.textContent = el.getAttribute('data-en'); }); }
+function getMySvg(){const s=new Date(2026,6,17),e=new Date(2027,5,24),t=new Date();let v=3;if(t>=e)v=3.9;else if(t>s){const d=(t-s)/864e5;v=3+d*.9/342}const n=Math.floor(v);return '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="240" fill="#FF9900"/><path d="M 330 50 C 400 150, 480 300, 480 450 L 300 480 C 350 350, 320 200, 330 50 Z" fill="#D29A68"/><path d="M 380 100 C 440 200, 490 350, 490 490 L 350 490 C 400 350, 380 200, 380 100 Z" fill="#5C3928"/><path d="M 250 480 C 350 380, 420 250, 460 150 L 490 200 C 460 300, 400 420, 310 490 Z" fill="#FCE6C9"/><text x="220" y="330" font-family="Montserrat,sans-serif" font-size="380" font-weight="900" fill="#FCE6C9" text-anchor="middle" letter-spacing="-15">'+n+'</text><text x="270" y="160" font-family="Montserrat,sans-serif" font-size="80" font-weight="900" fill="#FFFFFF" text-anchor="middle">MY</text><path d="M 150 280 C 130 220, 200 150, 280 160 C 350 170, 380 230, 320 280 C 280 310, 220 290, 170 260" fill="none" stroke="#FF7700" stroke-width="18" stroke-linecap="round"/></svg>'}
+function getMtvSvg(){return '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="240" fill="#0076FF"/><path d="M 320 50 C 380 150, 450 280, 480 380 L 410 490 C 380 350, 340 250, 320 50 Z" fill="#99D6FF"/><path d="M 370 90 C 410 170, 460 300, 490 420 L 430 480 C 400 350, 380 250, 370 90 Z" fill="#D1EFFF"/><path d="M 280 480 C 340 410, 390 300, 410 200 L 450 240 C 430 340, 380 430, 320 490 Z" fill="#D1EFFF"/><rect x="105" y="180" width="190" height="145" rx="15" fill="#D1EFFF"/><rect x="120" y="195" width="160" height="115" rx="8" fill="#FFFFFF" opacity="0.5"/><path d="M 190 325 L 190 365 L 165 380 C 150 385, 150 400, 165 400 L 230 400 C 245 400, 245 385, 230 380 L 210 365 L 210 325 Z" fill="#D1EFFF"/><text x="250" y="160" font-family="Arial Black,Impact,sans-serif" font-size="65" font-weight="900" fill="#003399" text-anchor="middle" letter-spacing="4">MTV1</text></svg>'}
+function getBlSvg(){const s=new Date(2026,6,17),t=new Date();let m=(t.getFullYear()-s.getFullYear())*12+(t.getMonth()-s.getMonth());if(t.getDate()<s.getDate())m--;let n=1;if(m>=0){let v=1+Math.floor(m/2)*.5;n=Math.floor(v)}return '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="240" fill="#0099CC"/><path d="M 250 10 C 150 10, 50 100, 30 220 L 190 250 L 250 10 Z" fill="#B0E6FF"/><path d="M 190 250 C 230 140, 250 60, 250 10" fill="none" stroke="#0077AA" stroke-width="12"/><text x="145" y="210" font-family="Arial,sans-serif" font-size="100" font-weight="900" fill="#004466" text-anchor="middle">BL</text><text x="270" y="360" font-family="Arial,sans-serif" font-size="200" font-weight="900" fill="#004466" text-anchor="middle">'+n+'</text></svg>'}
+function getM15ySvg(){return '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="240" fill="#FF0088"/><path d="M 240 10 C 340 50, 450 160, 470 280 C 490 400, 400 470, 280 490 C 240 490, 220 450, 230 350 C 240 250, 280 180, 310 140 C 330 110, 310 60, 240 10 Z" fill="#FF99CC"/><path d="M 80 80 C 150 30, 200 80, 220 130 C 240 180, 210 210, 160 200 C 110 190, 70 150, 50 110 Z" fill="#990044"/><path d="M 250 350 C 300 380, 350 430, 330 480 L 200 480 C 220 440, 210 390, 250 350 Z" fill="#990044"/><path d="M 30 280 C 70 250, 120 240, 150 280 C 180 320, 160 370, 120 390 C 80 410, 40 380, 20 340 Z" fill="#FF0088" stroke="#FF99CC" stroke-width="18" stroke-linecap="round"/><path d="M 130 410 C 160 430, 190 450, 170 490" fill="none" stroke="#FF99CC" stroke-width="15" stroke-linecap="round"/><text x="250" y="230" font-family="Arial Black,Impact,sans-serif" font-size="80" font-weight="900" fill="#66002E" text-anchor="middle" letter-spacing="8">M15Y</text></svg>'}
+function getMauSvg(){return '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="240" fill="#F02F89"/><path d="M 40 350 C 110 320, 160 370, 190 430 C 160 470, 100 480, 40 490 Z" fill="#FFC6DA"/><path d="M 60 120 C 130 100, 170 140, 190 190 C 130 180, 90 160, 40 180 Z" fill="#FFC6DA"/><path d="M 440 270 C 380 260, 360 300, 370 370 C 400 420, 450 420, 480 400 Z" fill="#FFC6DA"/><text x="248" y="225" font-family="Arial Black,Impact,sans-serif" font-size="75" font-weight="900" fill="#A8004E" text-anchor="middle" letter-spacing="2">MAU5.6</text></svg>'}
+function getVikSvg(){const e=new Date(2026,7,1),t=new Date(),c=t>=e;return '<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><circle cx="250" cy="250" r="240" fill="#FF9900"/><path d="M 160 40 C 250 10, 350 30, 400 50" fill="none" stroke="#5C3A1E" stroke-width="18" stroke-linecap="round"/><path d="M 110 90 C 150 80, 220 90, 270 110 C 350 140, 420 190, 440 260 C 450 310, 410 360, 360 390 C 300 420, 240 400, 190 360 L 190 390 L 140 390 L 130 310 C 110 260, 90 180, 110 90 Z" fill="#5C3A1E"/><path d="M 230 150 L 180 230 L 240 240 L 150 350 L 200 350 L 260 230 L 240 210 L 300 140 Z" fill="#FF9900"/><text x="250" y="320" font-family="Arial Black,Impact,sans-serif" font-size="'+(c?120:260)+'" font-weight="900" fill="#FFD699" text-anchor="middle" letter-spacing="-10">'+(c?(LANG==='en'?'CLOSED':'ЗАКРЫТО'):'1')+'</text></svg>'}
+const osF=[getMySvg,getMtvSvg,getBlSvg,getM15ySvg,getMauSvg,getVikSvg],osIds=['os1','os2','os3','os4','os5','os6','os7','os8','os9'];
+function renderOs(){osIds.forEach(function(id,i){var el=document.getElementById(id);if(el)el.innerHTML=osF[i%osF.length]()})}
+renderOs();
+setInterval(function(){[0,2,5].forEach(function(i){osIds.forEach(function(id,j){if(j%osF.length===i){var el=document.getElementById(id);if(el)el.innerHTML=osF[i]()}})})},5000);
+</script>
+</body>
+</html></template>
+
+<template id="src-train"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>MYRUNSTORE</title>
+<style>
+body, html { margin: 0; padding: 0; width: 100%; min-height: 100vh; background: transparent !important; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
+.infinite-scroll-container { position: relative; width: 100%; height: 100vh; min-height: 500px; overflow: hidden; display: flex; align-items: center; justify-content: flex-start; user-select: none; touch-action: none; }
+.scroll-track { display: flex; gap: 20px; width: max-content; cursor: grab; will-change: transform; transition: transform 0.1s ease-out; touch-action: none; }
+.scroll-track:active { cursor: grabbing; }
+.glass-card { display: flex; align-items: center; justify-content: center; min-width: 160px; height: 80px; padding: 0 25px; background: rgba(255,255,255,0.05); backdrop-filter: blur(6px); border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: rgba(255,255,255,0.9); font-weight: 900; font-size: 22px; text-transform: uppercase; letter-spacing: 2px; white-space: nowrap; }
+.glass-card-break { display: flex; align-items: center; justify-content: center; min-width: 60px; height: 80px; background: rgba(255,255,255,0.02); backdrop-filter: blur(4px); border-radius: 30px; border: 1px dashed rgba(255,255,255,0.15); }
+@media (max-width: 600px) { .glass-card { min-width: 120px; height: 60px; font-size: 16px; padding: 0 15px; } .glass-card-break { min-width: 40px; height: 60px; } }
+</style>
+</head>
+<body>
+<div class="infinite-scroll-container"><div class="scroll-track" id="scrollTrack"></div></div>
+<script>
+var LANG = window.__MRS_LANG__ || 'ru';
+var words = LANG === 'en'
+  ? ["This","is","the","official","store","MYRUNSTORE","buy","our","gadgets","quickly","and","profitably","with","you","MAYSKIY RUNWAY","VIKO","BALOVSK"]
+  : ["Это","официальный","магазин","MYRUNSTORE","покупайте","наши","гаджеты","выгодно","и","быстро","с","вами","MAYSKIY RUNWAY","VIKO","BALOVSK"];
+var track=document.getElementById('scrollTrack');
+var html='';for(var c=0;c<3;c++){words.forEach(function(w){html+='<div class="glass-card">'+w+'</div>';if(w==="BALOVSK")html+='<div class="glass-card-break"></div>'})}
+track.innerHTML=html;
+var isDrag=false,startX=0,cur=0,raf=null,SPEED=0.7;
+function w(){return track.scrollWidth/3}
+function auto(){if(!isDrag){cur-=SPEED;var t=w();if(cur<-t*1.8)cur+=t*1.7;track.style.transform='translateX('+cur+'px)'}raf=requestAnimationFrame(auto)}
+auto();
+function getClientX(e){ if (e.touches && e.touches.length) return e.touches[0].clientX; if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0].clientX; return e.pageX; }
+function onDragStart(e){ isDrag=true; startX=getClientX(e)-track.getBoundingClientRect().left; cancelAnimationFrame(raf); if (e.cancelable && e.type==='touchstart') {} }
+function onDragMove(e){ if(!isDrag)return; var x=getClientX(e)-track.getBoundingClientRect().left; cur+=(x-startX)*0.8; track.style.transform='translateX('+cur+'px)'; startX=x; }
+function onDragEnd(){ if(isDrag){isDrag=false; raf=requestAnimationFrame(auto);} }
+track.addEventListener('mousedown',onDragStart);
+track.addEventListener('touchstart',onDragStart,{passive:true});
+window.addEventListener('mousemove',onDragMove);
+window.addEventListener('touchmove',onDragMove,{passive:true});
+window.addEventListener('mouseup',onDragEnd);
+window.addEventListener('touchend',onDragEnd);
+window.addEventListener('touchcancel',onDragEnd);
+</script>
+</body>
+</html></template>
+
+<template id="src-runway"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>MAYSKIY RUNWAY</title>
+<style>
+body, html { margin: 0; padding: 0; width: 100%; min-height: 100vh; background: transparent !important; display: flex; justify-content: center; align-items: center; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
+.text-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; perspective: 800px; cursor: grab; user-select: none; touch-action: none; }
+.main-word, .sub-word { display: flex; align-items: center; justify-content: center; }
+.sub-word { margin-top: 0.5vw; }
+.letter { display: inline-block; font-weight: 900; color: #ffffff; text-transform: uppercase; text-shadow: 0 0 30px rgba(255,255,255,0.15), 3px 3px 0 rgba(200,200,200,0.1), 6px 6px 0 rgba(150,150,150,0.05), 10px 10px 20px rgba(0,0,0,0.4); transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.3s ease; transform: rotateY(0deg) scale(1); }
+.main-word .letter { font-size: 12vw; }
+.sub-word .letter { font-size: 6vw; }
+.text-wrapper.outline-main .main-word .letter, .text-wrapper.outline-sub .sub-word .letter { color: transparent !important; -webkit-text-stroke: 3px #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.6); }
+.letter.spinning-letter { animation: spinL 0.2s linear infinite; }
+@keyframes spinL { 0% { transform: rotateY(0deg) scale(1); } 100% { transform: rotateY(360deg) scale(1); } }
+.text-wrapper.spinning-word { animation: spinW 5s cubic-bezier(0.25,1,0.5,1) forwards; }
+@keyframes spinW { 0% { transform: rotate(0deg); } 100% { transform: rotate(3600deg); } }
+@media (max-width: 600px) { .main-word .letter { font-size: 14vw; } .sub-word .letter { font-size: 7vw; } }
+</style>
+</head>
+<body>
+<div class="text-wrapper" id="textWrapper">
+  <div class="main-word" id="mainWord"><span class="letter" id="m1">M</span><span class="letter" id="m2">A</span><span class="letter" id="m3">Y</span><span class="letter" id="m4">S</span><span class="letter" id="m5">K</span><span class="letter" id="m6">I</span><span class="letter" id="m7">Y</span></div>
+  <div class="sub-word" id="subWord"><span class="letter" id="s1">R</span><span class="letter" id="s2">U</span><span class="letter" id="s3">N</span><span class="letter" id="s4">W</span><span class="letter" id="s5">A</span><span class="letter" id="s6">Y</span></div>
+</div>
+<script>
+var wrapper=document.getElementById('textWrapper');
+var mainLetters=['m1','m2','m3','m4','m5','m6','m7'].map(function(i){return document.getElementById(i)});
+var subLetters=['s1','s2','s3','s4','s5','s6'].map(function(i){return document.getElementById(i)});
+var allLetters=[].concat(mainLetters,subLetters);
+var isDrag=false,isScale=false,axis='width',startX=0,startY=0,rot=0,startAng=0;
+var BS=12,BH=1,curSp=BS,curH=BH,startSp=0,startHt=1;
+var wasDragged=false, touchStartPos=null;
+
+allLetters.forEach(function(el){var cnt=0,t=null;el.addEventListener('click',function(e){e.stopPropagation();if(wrapper.classList.contains('spinning-word'))return;if(wasDragged)return;cnt++;clearTimeout(t);t=setTimeout(function(){if(cnt===2){if(mainLetters.indexOf(el)>-1)wrapper.classList.toggle('outline-main');else if(subLetters.indexOf(el)>-1)wrapper.classList.toggle('outline-sub')}else if(cnt>=3){if(el.id==='m4'){wrapper.classList.add('spinning-word');setTimeout(function(){wrapper.classList.remove('spinning-word')},5000)}else{el.classList.add('spinning-letter');setTimeout(function(){el.classList.remove('spinning-letter')},5000)}}cnt=0},400)})});
+
+function getXY(e){
+  if (e.touches && e.touches.length) return {x:e.touches[0].clientX, y:e.touches[0].clientY};
+  if (e.changedTouches && e.changedTouches.length) return {x:e.changedTouches[0].clientX, y:e.changedTouches[0].clientY};
+  return {x:e.clientX, y:e.clientY};
+}
+function ang(e){var xy=getXY(e);var r=wrapper.getBoundingClientRect();return Math.atan2(xy.y-(r.top+r.height/2),xy.x-(r.left+r.width/2))*(180/Math.PI)}
+function dist(e){var xy=getXY(e);var r=wrapper.getBoundingClientRect();return Math.sqrt(Math.pow(xy.x-(r.left+r.width/2),2)+Math.pow(xy.y-(r.top+r.height/2),2))}
+
+function apply(){wrapper.style.letterSpacing=Math.max(0,curSp)+'px';allLetters.forEach(function(it,i){var o=(i-(allLetters.length-1)/2)/(allLetters.length/2);var a=((curSp-BS)/-10)*35*o;it.style.transform='rotateY('+a+'deg) scaleY('+curH+')'})}
+
+function onDown(e){
+  if(wrapper.classList.contains('spinning-word'))return;
+  var xy=getXY(e);
+  var r=wrapper.getBoundingClientRect();
+  var rx=xy.x-r.left, ry=xy.y-r.top;
+  if(rx/r.width<0.15||rx/r.width>0.85){isScale=true;axis='width';startX=dist(e);startSp=curSp;}
+  else if(ry/r.height<0.15||ry/r.height>0.85){isScale=true;axis='height';startY=dist(e);startHt=curH;}
+  else {isDrag=true;startAng=ang(e);}
+  if(e.type==='touchstart'){ touchStartPos={x:xy.x,y:xy.y}; wasDragged=false; }
+}
+function onMove(e){
+  if(!isScale&&!isDrag)return;
+  if(wrapper.classList.contains('spinning-word'))return;
+  if(e.type==='touchmove' && touchStartPos){
+    var xy=getXY(e);
+    var dx=xy.x-touchStartPos.x, dy=xy.y-touchStartPos.y;
+    if(Math.sqrt(dx*dx+dy*dy)>8) wasDragged=true;
+  }
+  if(isScale){
+    var d=(dist(e)-startX)/100;
+    if(axis==='width'){curSp=Math.max(0,Math.min(25,startSp+d*15));}
+    else{curH=Math.max(0.4,Math.min(1.6,startHt+d*0.5));}
+    apply();
+  }
+  if(isDrag){
+    var a=ang(e);
+    rot+=a-startAng;
+    wrapper.style.transform='rotate('+rot+'deg)';
+    startAng=a;
+  }
+}
+function onUp(e){
+  if(isScale){isScale=false;curSp=BS;curH=BH;apply();}
+  if(isDrag)isDrag=false;
+  if(e && e.type==='touchend' && wasDragged){
+    if(e.cancelable){ try{e.preventDefault();}catch(_){} }
+  }
+  touchStartPos=null;
+}
+
+wrapper.addEventListener('mousedown',onDown);
+wrapper.addEventListener('touchstart',onDown,{passive:true});
+window.addEventListener('mousemove',onMove);
+window.addEventListener('touchmove',onMove,{passive:true});
+window.addEventListener('mouseup',onUp);
+window.addEventListener('touchend',onUp,{passive:false});
+window.addEventListener('touchcancel',onUp);
+apply();
+</script>
+</body>
+</html></template>
+
+<template id="src-ai"><!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>MayUm, VI, BaloAI</title>
+<link href="https://fonts.googleapis.com/css2?family=YS+Text:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'YS Text','Segoe UI',Tahoma,Verdana,sans-serif;}
+body{background:radial-gradient(ellipse at top,#1a0a18 0%,#08040a 100%);min-height:100vh;color:#fff;}
+.navbar{background:rgba(20,8,16,0.85);backdrop-filter:blur(15px);padding:16px 40px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:20;margin:20px auto;border-radius:40px;max-width:1200px;box-shadow:0 10px 30px rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.08);animation:menuDrop 0.8s cubic-bezier(0.175,0.885,0.32,1.275) forwards;}
+@keyframes menuDrop{0%{opacity:0;transform:translateY(-120px) scale(0.95);}100%{opacity:1;transform:translateY(0) scale(1);}}
+.brand-logo{font-family:'Dancing Script',cursive;font-weight:700;font-size:28px;min-width:180px;text-align:center;text-shadow:0 4px 10px rgba(0,0,0,0.2);padding:0 10px;}
+.logo-mau{background:linear-gradient(135deg,#ff007f,#d4145a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-vi{background:linear-gradient(135deg,#fcb045,#f5af19);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:22px;}
+.logo-balo{background:linear-gradient(135deg,#00b4db,#0083b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:22px;}
+.nav-menu{display:flex;gap:32px;list-style:none;}
+.nav-menu li{font-size:18px;font-weight:600;color:#999;cursor:pointer;transition:all 0.3s ease;padding:8px 4px;position:relative;}
+.nav-menu li::after{content:'';position:absolute;width:0;height:3px;bottom:0;left:0;transition:0.3s;border-radius:10px;}
+.nav-menu li.active{color:#fff;}
+.nav-menu li.active::after{width:100%;}
+.nav-menu li:hover{color:#ddd;}
+.tab-container{max-width:1300px;margin:0 auto;padding:0 20px;position:relative;}
+.tab-content{display:none;flex-direction:column;align-items:center;width:100%;}
+.tab-content.active{display:flex;}
+.main-bg{width:100%;border-radius:40px;position:relative;overflow:hidden;margin-top:-100px;padding-top:100px;padding-bottom:80px;z-index:1;background-size:400% 400%;animation:gradientMove 12s ease infinite;}
+.main-bg::before,.main-bg::after{content:'';position:absolute;border-radius:50%;filter:blur(100px);opacity:0.5;z-index:0;}
+.hero{width:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 20px 100px 20px;position:relative;z-index:1;color:white;}
+.hero-content{max-width:700px;position:relative;z-index:1;}
+.hero h1{font-size:64px;font-weight:500;margin-bottom:20px;letter-spacing:-1px;display:inline-block;}
+.hero p{font-size:18px;line-height:1.6;font-weight:300;opacity:0.9;}
+.products-grid{width:100%;position:relative;z-index:2;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:-60px;}
+.card-unified{border-radius:32px;padding:32px 24px 24px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;min-height:200px;height:100%;transition:all 0.3s ease;border:1px solid rgba(255,255,255,0.15);box-shadow:0 10px 40px rgba(0,0,0,0.3);opacity:0;transform:translateY(-80px);backdrop-filter:blur(12px);}
+.card-unified:hover{transform:scale(1.02);box-shadow:0 20px 60px rgba(0,0,0,0.4);background:rgba(255,255,255,0.95) !important;}
+.card-unified .title{font-size:22px;font-weight:600;margin-bottom:8px;}
+.card-unified .desc{font-size:14px;line-height:1.5;font-weight:400;margin-bottom:16px;color:#555;flex-grow:1;}
+.btn-unified{width:100%;padding:12px 20px;border:none;border-radius:20px;font-size:14px;font-weight:600;color:#fff;background:#333;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2);margin-top:auto;}
+.btn-unified:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(0,0,0,0.3);}
+.btn-unified a{color:white;text-decoration:none;display:block;width:100%;}
+@keyframes bubbleMove{0%{transform:translate(0,0) scale(1);}100%{transform:translate(60px,-60px) scale(1.2);}}
+.tab-content.active .card-unified:nth-child(1){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.1s forwards;}
+.tab-content.active .card-unified:nth-child(2){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.2s forwards;}
+.tab-content.active .card-unified:nth-child(3){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.3s forwards;}
+.tab-content.active .card-unified:nth-child(4){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.4s forwards;}
+.tab-content.active .card-unified:nth-child(5){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.5s forwards;}
+.tab-content.active .card-unified:nth-child(6){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.6s forwards;}
+.tab-content.active .card-unified:nth-child(7){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.7s forwards;}
+.tab-content.active .card-unified:nth-child(8){animation:cardDrop 0.7s cubic-bezier(0.175,0.885,0.32,1.275) 0.8s forwards;}
+@keyframes cardDrop{0%{opacity:0;transform:translateY(-80px) scale(0.95);}100%{opacity:1;transform:translateY(0) scale(1);}}
+.tab-mayum .main-bg{background:linear-gradient(135deg,#d4145a,#8a2387,#4b124f,#d4145a);background-size:400% 400%;animation:gradientMove 12s ease infinite;}
+.tab-mayum .main-bg::before{width:600px;height:600px;background:#ff007f;top:-20%;left:-20%;animation:bubbleMove 15s ease-in-out infinite alternate;}
+.tab-mayum .main-bg::after{width:500px;height:500px;background:#6a00ff;bottom:-20%;right:-20%;animation:bubbleMove 20s ease-in-out infinite alternate-reverse;}
+.tab-mayum .nav-menu li.active::after{background:#8a2387;}
+.tab-mayum .card-unified{background:rgba(245,230,255,0.92);}
+.tab-mayum .card-unified .title{color:#6a1b9a;}
+.tab-mayum .btn-unified{background:linear-gradient(135deg,#d4145a,#8a2387);}
+.tab-vi .main-bg{background:linear-gradient(135deg,#fcb045,#f5af19,#d9480f,#fcb045);background-size:400% 400%;animation:gradientMove 10s ease infinite;}
+.tab-vi .main-bg::before{width:500px;height:500px;background:#fff9a6;top:-10%;right:-10%;animation:bubbleMove 12s ease-in-out infinite alternate;}
+.tab-vi .main-bg::after{width:400px;height:400px;background:#ff8c00;bottom:-10%;left:-10%;animation:bubbleMove 18s ease-in-out infinite alternate-reverse;}
+.tab-vi .nav-menu li.active::after{background:#fcb045;}
+.tab-vi .card-unified{background:rgba(255,248,220,0.92);}
+.tab-vi .card-unified .title{color:#b85d19;}
+.tab-vi .btn-unified{background:linear-gradient(135deg,#fcb045,#f5af19);color:#222;}
+.tab-vi .btn-unified a{color:#222;}
+.tab-baloai .main-bg{background:linear-gradient(135deg,#00b4db,#0083b0,#003b64,#00b4db);background-size:400% 400%;animation:gradientMove 15s ease infinite;}
+.tab-baloai .main-bg::before{width:600px;height:600px;background:#7df9ff;top:-30%;left:-20%;animation:bubbleMove 14s ease-in-out infinite alternate;}
+.tab-baloai .main-bg::after{width:500px;height:500px;background:#005b96;bottom:-20%;right:-20%;animation:bubbleMove 22s ease-in-out infinite alternate-reverse;}
+.tab-baloai .nav-menu li.active::after{background:#0083b0;}
+.tab-baloai .card-unified{background:rgba(225,245,255,0.92);}
+.tab-baloai .card-unified .title{color:#005b96;}
+.tab-baloai .btn-unified{background:linear-gradient(135deg,#00b4db,#0083b0);}
+.tab-about .main-bg{background:linear-gradient(135deg,#d4145a,#fcb045,#00b4db,#8a2387,#f5af19,#0083b0,#d4145a);background-size:400% 400%;animation:gradientMove 15s ease infinite;}
+.tab-about .nav-menu li.active::after{background:#fff;}
+.tab-about .card-unified:nth-child(1){background:rgba(245,230,255,0.92);}
+.tab-about .card-unified:nth-child(1) .title{color:#6a1b9a;}
+.tab-about .card-unified:nth-child(1) .btn-unified{background:linear-gradient(135deg,#d4145a,#8a2387);}
+.tab-about .card-unified:nth-child(2){background:rgba(255,248,220,0.92);}
+.tab-about .card-unified:nth-child(2) .title{color:#b85d19;}
+.tab-about .card-unified:nth-child(2) .btn-unified{background:linear-gradient(135deg,#fcb045,#f5af19);color:#222;}
+.tab-about .card-unified:nth-child(2) .btn-unified a{color:#222;}
+.tab-about .card-unified:nth-child(3){background:rgba(225,245,255,0.92);}
+.tab-about .card-unified:nth-child(3) .title{color:#005b96;}
+.tab-about .card-unified:nth-child(3) .btn-unified{background:linear-gradient(135deg,#00b4db,#0083b0);}
+@keyframes gradientMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+@media(max-width:900px){.products-grid{grid-template-columns:repeat(2,1fr);}.navbar{max-width:95%;padding:16px 20px;flex-wrap:wrap;justify-content:center;gap:10px;}.nav-menu{gap:20px;}.nav-menu li{font-size:16px;}.brand-logo{font-size:20px;min-width:110px;}}
+@media(max-width:768px){.navbar{border-radius:20px;flex-direction:column;}.nav-menu{width:100%;justify-content:center;}.hero{padding:60px 20px 80px;}.hero h1{font-size:40px;}.products-grid{grid-template-columns:1fr;margin-top:-40px;}.card-unified{min-height:180px;padding:30px;}.brand-logo{min-width:auto;width:100%;margin-top:-5px;}}
+</style>
+</head>
+<body>
+<header class="navbar">
+  <div class="brand-logo logo-mau" id="leftLogo">MAU</div>
+  <ul class="nav-menu" id="navTabs">
+    <li class="active" data-target="mayum" data-en="MayUm">МайУм</li>
+    <li data-target="vi" data-en="VI">VI</li>
+    <li data-target="baloai" data-en="BaloAI">BaloAI</li>
+    <li data-target="about" data-en="About AI">О ИИ</li>
+  </ul>
+  <div class="brand-logo logo-mau" id="rightLogo">MAU</div>
+</header>
+<div class="tab-container">
+  <div id="mayum" class="tab-content tab-mayum active"><div class="main-bg"><section class="hero"><div class="hero-content"><h1>МайУм</h1><p data-en="Smart, new and modern AI ecosystem with advanced neural networks that anticipates your desires.">Умная, новая и современная ИИ-экосистема с передовыми нейросетями, способная предугадывать ваши желания.</p></div></section><div class="products-grid">
+    <div class="card-unified"><h2 class="title">MayUm 1</h2><p class="desc" data-en="Base model that opens the world of MayUm technologies.">Базовая модель, открывающая мир технологий МайУм.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm 1+</h2><p class="desc" data-en="Enhanced version with increased performance.">Улучшенная версия с повышенной производительностью.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm 2</h2><p class="desc" data-en="Next generation with extended features.">Следующее поколение с расширенным функционалом.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm 3</h2><p class="desc" data-en="Powerful new product with advanced algorithms.">Мощная новинка с передовыми алгоритмами.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm MAX</h2><p class="desc" data-en="Flagship model, stretched vertically.">Флагманская модель, вытянутая в высоту.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm MINI</h2><p class="desc" data-en="Compact and stylish version for everyday tasks.">Компактная и стильная версия для повседневных задач.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm MAXMINI</h2><p class="desc" data-en="Universal model combining power and compactness.">Универсальная модель, сочетающая мощь и компактность.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">MayUm MINI+</h2><p class="desc" data-en="Enhanced version, stretched horizontally.">Улучшенная версия, вытянутая в ширину.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+  </div></div></div>
+  <div id="vi" class="tab-content tab-vi"><div class="main-bg"><section class="hero"><div class="hero-content"><h1>VI</h1><p data-en="New emerging AI platform with friendly and warm interface.">Новая начинающая ИИ-платформа с дружелюбным и теплым интерфейсом.</p></div></section><div class="products-grid">
+    <div class="card-unified"><h2 class="title">VI-MINI</h2><p class="desc" data-en="Miniature and stylish speaker for everyday use.">Миниатюрная и стильная колонка для повседневного использования.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">VI-MAX</h2><p class="desc" data-en="Maximum performance and sound in a premium body.">Максимальная производительность и звук в корпусе премиум-класса.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">VI-PRO</h2><p class="desc" data-en="Flagship assistant for the most complex scenarios.">Флагманский помощник для самых сложных сценариев.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+  </div></div></div>
+  <div id="baloai" class="tab-content tab-baloai"><div class="main-bg"><section class="hero"><div class="hero-content"><h1>BaloAI</h1><p data-en="New emerging AI system with deep learning and elegant minimalism.">Новая начинающая путь ИИ-система с глубоким обучением и элегантным минимализмом.</p></div></section><div class="products-grid">
+    <div class="card-unified"><h2 class="title">BALOpro</h2><p class="desc" data-en="Professional model for maximum information processing.">Профессиональная модель для максимальной обработки информации.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">BALOmini</h2><p class="desc" data-en="Compact and fast assistant for everyday use.">Компактный и шустрый помощник для повседневного использования.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+    <div class="card-unified"><h2 class="title">BALO-1</h2><p class="desc" data-en="Base and reliable model to discover BaloAI technologies.">Базовая и надежная модель для знакомства с технологиями BaloAI.</p><button class="btn-unified"><a href="#" data-en="Buy">Купить</a></button></div>
+  </div></div></div>
+  <div id="about" class="tab-content tab-about"><div class="main-bg"><section class="hero"><div class="hero-content"><h1 data-en="About our AIs">О наших ИИ</h1><p data-en="Three unique May AIs, each with its own character.">Три уникальных Майских ИИ, каждый из которых обладает своим характером.</p></div></section><div class="products-grid">
+    <div class="card-unified"><h2 class="title">МайУм</h2><div class="desc" data-en="<p><strong>MayUm</strong> — advanced AI from <strong>MAYSKIY RUNWAY</strong>.</p>"><p><strong>МайУм</strong> — передовой искусственный интеллект от компании <strong>MAYSKIY RUNWAY</strong>.</p></div><button class="btn-unified"><a href="#" data-en="Learn more">Узнать больше</a></button></div>
+    <div class="card-unified"><h2 class="title">VI</h2><div class="desc" data-en="<p><strong>VI</strong> — AI created by <strong>VIKO</strong>.</p>"><p><strong>VI</strong> — искусственный интеллект, созданный компанией <strong>VIKO</strong>.</p></div><button class="btn-unified"><a href="#" data-en="Learn more">Узнать больше</a></button></div>
+    <div class="card-unified"><h2 class="title">BaloAI</h2><div class="desc" data-en="<p><strong>BaloAI</strong> — innovative system from <strong>Balovsk</strong>.</p>"><p><strong>BaloAI</strong> — инновационная система от компании <strong>Баловск</strong>.</p></div><button class="btn-unified"><a href="#" data-en="Learn more">Узнать больше</a></button></div>
+  </div></div></div>
+</div>
+<script>
+var LANG = window.__MRS_LANG__ || 'ru';
+if (LANG === 'en') {
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v = el.getAttribute('data-en');
+    if (v.indexOf('<') > -1) el.innerHTML = v; else el.textContent = v;
+  });
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var tabs=document.querySelectorAll('#navTabs li'),contents=document.querySelectorAll('.tab-content');
+  var cur=0,timer,reset;
+  var ll=document.getElementById('leftLogo'),rl=document.getElementById('rightLogo');
+  var ld={'mayum':{c:'logo-mau',t:'MAU'},'vi':{c:'logo-vi',t:'VIKO Intelligence'},'baloai':{c:'logo-balo',t:'Balovsk Intelligence'},'about':{c:'logo-mau',t:LANG==='en'?'About AI':'О ИИ'}};
+  function sw(i){if(tabs[i].classList.contains('active'))return;tabs.forEach(function(t){t.classList.remove('active')});contents.forEach(function(c){c.classList.remove('active')});var id=tabs[i].getAttribute('data-target'),tc=document.getElementById(id);tc.classList.remove('active');void tc.offsetWidth;tc.classList.add('active');tabs[i].classList.add('active');cur=i;var d=ld[id];[ll,rl].forEach(function(l){l.className='brand-logo '+d.c;l.textContent=d.t})}
+  function nx(){sw((cur+1)%3)}
+  function st(r,ab){r=r||false;ab=ab||false;clearInterval(timer);clearTimeout(reset);if(r){reset=setTimeout(function(){st(false)},ab?100000:20000)}else{timer=setInterval(nx,3000)}}
+  tabs.forEach(function(t,i){t.addEventListener('click',function(){sw(i);st(true,this.getAttribute('data-target')==='about')})});
+  st(false);
+});
+</script>
+</body>
+</html></template>
+
+<template id="src-clock"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>MayUm - Clock</title>
+<style>
+body,html{margin:0;padding:0;width:100%;min-height:100vh;background:transparent !important;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI',Arial,sans-serif;overflow:hidden;}
+.mayum-widget{position:relative;width:100%;max-width:400px;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;}
+.mayum-svg-container{width:100%;max-width:350px;height:auto;display:block;filter:drop-shadow(0 10px 30px rgba(255,0,136,0.3));}
+.controls{display:flex;gap:15px;margin-top:20px;}
+.mode-btn{background:rgba(255,255,255,0.1);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:18px;font-weight:700;padding:10px 25px;border-radius:30px;cursor:pointer;transition:all 0.3s ease;letter-spacing:1px;font-family:inherit;}
+.mode-btn:hover{background:rgba(255,255,255,0.25);transform:scale(1.05);}
+.mode-btn.active{background:rgba(255,0,136,0.6);border-color:#ff0088;box-shadow:0 0 30px rgba(255,0,136,0.4);}
+@media(max-width:500px){.mayum-widget{max-width:300px;}.mode-btn{font-size:14px;padding:8px 18px;}}
+</style>
+</head>
+<body>
+<div class="mayum-widget">
+  <div class="mayum-svg-container">
+    <svg id="mayumClock" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+      <rect x="50" y="30" width="300" height="240" rx="15" fill="#000"/>
+      <rect x="50" y="30" width="300" height="20" rx="10" fill="#ff0088"><animate attributeName="fill" dur="3s" repeatCount="indefinite" values="#ff0088;#ff33aa;#ff66b2;#ff99cc;#ff66b2;#ff33aa;#ff0088"/></rect>
+      <g id="analogGroup" opacity="1">
+        <line id="hourHand" x1="200" y1="150" x2="200" y2="95" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+        <line id="minuteHand" x1="200" y1="150" x2="200" y2="70" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        <line id="secondHand" x1="200" y1="150" x2="200" y2="55" stroke="#ff0088" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="200" cy="150" r="6" fill="#fff"/>
+        <g id="ticksContainer"></g>
+      </g>
+      <g id="digitalGroup" opacity="0" visibility="hidden">
+        <text id="digTime" x="200" y="210" font-family="Segoe UI,Arial,sans-serif" font-size="115" font-weight="900" fill="#ff0088" text-anchor="middle">16:45</text>
+      </g>
+    </svg>
+  </div>
+  <div class="controls">
+    <button class="mode-btn active" id="btnAnalog" data-en="CLOCK">ЧАСЫ</button>
+    <button class="mode-btn" id="btnDigital" data-en="DIGITAL">ЦИФРЫ</button>
+  </div>
+</div>
+<script>
+var LANG = window.__MRS_LANG__ || 'ru';
+if (LANG === 'en') { document.querySelectorAll('[data-en]').forEach(function(el){ el.textContent = el.getAttribute('data-en'); }); }
+var tc=document.getElementById('ticksContainer'),cx=200,cy=150,tr=85,tir=75;
+for(var i=0;i<12;i++){var a=(i*30-90)*(Math.PI/180),ox=cx+tr*Math.cos(a),oy=cy+tr*Math.sin(a),ih=(i%3===0)?4:2,lo=(i%3===0)?5:0,ix=cx+(tir+lo)*Math.cos(a),iy=cy+(tir+lo)*Math.sin(a),ln=document.createElementNS("http://www.w3.org/2000/svg","line");ln.setAttribute('x1',ox);ln.setAttribute('y1',oy);ln.setAttribute('x2',ix);ln.setAttribute('y2',iy);ln.setAttribute('stroke','#fff');ln.setAttribute('stroke-width',ih);ln.setAttribute('stroke-linecap','round');tc.appendChild(ln)}
+var hh=document.getElementById('hourHand'),mh=document.getElementById('minuteHand'),sh=document.getElementById('secondHand'),dt=document.getElementById('digTime'),ag=document.getElementById('analogGroup'),dg=document.getElementById('digitalGroup');
+var an=true;
+function upd(){var n=new Date(),s=n.getSeconds(),m=n.getMinutes(),h=n.getHours();sh.setAttribute('transform','rotate('+(s*6)+',200,150)');mh.setAttribute('transform','rotate('+((m+s/60)*6)+',200,150)');hh.setAttribute('transform','rotate('+((h%12+m/60)*30)+',200,150)');dt.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m}
+document.getElementById('btnAnalog').addEventListener('click',function(){if(an)return;an=true;ag.setAttribute('opacity','1');ag.setAttribute('visibility','visible');dg.setAttribute('opacity','0');dg.setAttribute('visibility','hidden');document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')});
+document.getElementById('btnDigital').addEventListener('click',function(){if(!an)return;an=false;ag.setAttribute('opacity','0');ag.setAttribute('visibility','hidden');dg.setAttribute('opacity','1');dg.setAttribute('visibility','visible');document.querySelectorAll('.mode-btn').forEach(function(b){b.classList.remove('active')});this.classList.add('active')});
+setInterval(upd,1000);upd();
+</script>
+</body>
+</html></template>
+
+<template id="src-mau"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>OS MAU Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+body,html{margin:0;padding:0;width:100%;min-height:100vh;background:transparent !important;display:flex;justify-content:center;align-items:center;font-family:'Montserrat',sans-serif;overflow:hidden;}
+.mau-widget-container{width:100%;max-width:500px;aspect-ratio:1/1;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;box-sizing:border-box;}
+.aurora-container{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden;border-radius:50%;}
+.aurora-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.7;animation:floatAurora 14s infinite alternate cubic-bezier(0.4,0,0.2,1);}
+@keyframes floatAurora{0%{transform:translate(0%,0%) scale(1);opacity:0.4;}25%{transform:translate(30%,-25%) scale(1.2);opacity:0.7;}50%{transform:translate(-25%,30%) scale(0.9);opacity:0.5;}75%{transform:translate(15%,-35%) scale(1.4);opacity:0.8;}100%{transform:translate(-35%,15%) scale(1.1);opacity:0.4;}}
+.aurora-blob:nth-child(1){width:50%;height:50%;background:#FF66B2;top:10%;left:10%;animation-delay:0s;animation-duration:16s;}
+.aurora-blob:nth-child(2){width:40%;height:40%;background:#CC0066;top:50%;right:5%;animation-delay:-4s;animation-duration:18s;}
+.aurora-blob:nth-child(3){width:35%;height:35%;background:#99004D;bottom:5%;left:20%;animation-delay:-7s;animation-duration:20s;}
+.aurora-blob:nth-child(4){width:60%;height:60%;background:#FF3399;top:30%;right:30%;animation-delay:-11s;animation-duration:22s;opacity:0.3;}
+.content-layer{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;}
+.top-text{font-size:26px;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,0.7);margin-bottom:15px;letter-spacing:1.2px;text-align:center;}
+.mau-logo-svg{width:65%;height:auto;max-width:300px;display:block;filter:drop-shadow(0 8px 30px rgba(0,0,0,0.5));}
+.bottom-text{font-size:34px;font-weight:900;color:#fff;text-shadow:0 3px 15px rgba(0,0,0,0.8);margin-top:20px;letter-spacing:2px;text-align:center;}
+@media(max-width:600px){.mau-widget-container{max-width:350px;}.top-text{font-size:20px;}.bottom-text{font-size:28px;}.mau-logo-svg{width:80%;}.aurora-blob{filter:blur(50px);}}
+</style>
+</head>
+<body>
+<div class="mau-widget-container">
+  <div class="aurora-container"><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div></div>
+  <div class="content-layer">
+    <div class="top-text" data-en="Current MAU version">Текущая версия MAU</div>
+    <svg class="mau-logo-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="250" cy="250" r="240" fill="#FF5EA8"/>
+      <path d="M 0 250 C 0 382 107 490 240 490 C 372 490 488 385 488 250 C 320 280 200 400 120 485 C 40 420 0 340 0 250 Z" fill="#FFC8E3" opacity="0.85"/>
+      <path d="M 210 20 C 330 20, 440 100, 480 210" fill="none" stroke="#9E0047" stroke-width="26" stroke-linecap="round"/>
+      <path d="M 230 45 C 330 45, 420 110, 455 200" fill="none" stroke="#9E0047" stroke-width="12" stroke-linecap="round"/>
+      <path d="M 20 280 C 60 380, 140 460, 240 480" fill="none" stroke="#9E0047" stroke-width="26" stroke-linecap="round"/>
+      <path d="M 45 305 C 80 385, 145 445, 220 465" fill="none" stroke="#9E0047" stroke-width="12" stroke-linecap="round"/>
+      <text id="svgVersionText" x="210" y="240" font-family="Arial Black,Impact,sans-serif" font-size="75" font-weight="900" fill="#800033" text-anchor="middle">MAU5.7</text>
+      <path d="M 270 340 C 240 330, 215 370, 225 400 C 235 435, 275 450, 305 425 C 335 400, 375 330, 345 285 C 315 240, 240 280, 280 330 C 300 355, 340 350, 355 330 C 365 315, 355 295, 335 295 C 315 295, 300 315, 320 340 C 330 355, 320 385, 290 380 C 265 375, 250 350, 270 340 Z" fill="#0022B8"/>
+      <path d="M 300 300 C 330 320, 340 360, 310 390" fill="none" stroke="#001577" stroke-width="14" stroke-linecap="round"/>
+    </svg>
+    <div class="bottom-text" id="versionDisplay">MAU 5.7</div>
+  </div>
+</div>
+<script>
+var LANG=window.__MRS_LANG__||'ru';
+if(LANG==='en'){document.querySelectorAll('[data-en]').forEach(function(el){el.textContent=el.getAttribute('data-en');});}
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.getElementById('versionDisplay'),s=document.getElementById('svgVersionText');
+  var sy=2026,sm=8,t=new Date(),cy=t.getFullYear(),cm=t.getMonth();
+  var tm=(cy-sy)*12+(cm-sm),dv="5.7";
+  if(tm>0){var c=Math.floor(tm/19),mc=tm%19,maj=5+c;
+    if(mc===0)dv=maj+'.7';else if(mc===1)dv=maj+'.8';else if(mc===2)dv=maj+'.9';else if(mc>=3&&mc<=11)dv=maj+'.9.'+(mc-2);else dv=(maj+1)+'.'+(mc-12)}
+  if(dv.length>5)s.setAttribute('font-size','58');
+  b.textContent='MAU '+dv;s.textContent='MAU'+dv;
+});
+</script>
+</body>
+</html></template>
+
+<template id="src-m15y"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>OS M.Y Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+body,html{margin:0;padding:0;width:100%;min-height:100vh;background:transparent !important;display:flex;justify-content:center;align-items:center;font-family:'Montserrat',sans-serif;overflow:hidden;}
+.m15y-widget-container{width:100%;max-width:500px;aspect-ratio:1/1;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;box-sizing:border-box;}
+.aurora-container{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden;border-radius:50%;}
+.aurora-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.6;animation:floatAurora 12s infinite alternate cubic-bezier(0.4,0,0.2,1);}
+@keyframes floatAurora{0%{transform:translate(0%,0%) scale(1);opacity:0.5;}25%{transform:translate(30%,-20%) scale(1.3);opacity:0.8;}50%{transform:translate(-20%,30%) scale(0.8);opacity:0.6;}75%{transform:translate(10%,-30%) scale(1.5);opacity:0.9;}100%{transform:translate(-30%,10%) scale(1.1);opacity:0.5;}}
+.aurora-blob:nth-child(1){width:40%;height:40%;background:#FF0099;top:10%;left:10%;animation-delay:0s;animation-duration:14s;}
+.aurora-blob:nth-child(2){width:35%;height:35%;background:#E60073;top:50%;right:10%;animation-delay:-3s;animation-duration:16s;}
+.aurora-blob:nth-child(3){width:30%;height:30%;background:#CC0055;bottom:10%;left:30%;animation-delay:-6s;animation-duration:18s;}
+.aurora-blob:nth-child(4){width:50%;height:50%;background:#FF33BB;top:20%;right:20%;animation-delay:-9s;animation-duration:20s;opacity:0.4;}
+.aurora-blob:nth-child(5){width:25%;height:25%;background:#FFF;bottom:40%;left:5%;animation-delay:-2s;animation-duration:15s;opacity:0.3;}
+.content-layer{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;}
+.top-text{font-size:28px;font-weight:900;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,0.6);margin-bottom:15px;letter-spacing:1.5px;text-align:center;}
+.m15y-logo-svg{width:65%;height:auto;max-width:300px;display:block;filter:drop-shadow(0 5px 20px rgba(0,0,0,0.5));}
+@media(max-width:600px){.m15y-widget-container{max-width:350px;}.top-text{font-size:22px;}.m15y-logo-svg{width:80%;}.aurora-blob{filter:blur(50px);}}
+</style>
+</head>
+<body>
+<div class="m15y-widget-container">
+  <div class="aurora-container"><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div></div>
+  <div class="content-layer">
+    <div class="top-text" data-en="Current OS M.Y">Текущая ОС M.Y</div>
+    <svg class="m15y-logo-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="250" cy="250" r="240" fill="#FF0088"/>
+      <path d="M 240 10 C 340 50, 450 160, 470 280 C 490 400, 400 470, 280 490 C 240 490, 220 450, 230 350 C 240 250, 280 180, 310 140 C 330 110, 310 60, 240 10 Z" fill="#FF99CC"/>
+      <path d="M 80 80 C 150 30, 200 80, 220 130 C 240 180, 210 210, 160 200 C 110 190, 70 150, 50 110 Z" fill="#990044"/>
+      <path d="M 250 350 C 300 380, 350 430, 330 480 L 200 480 C 220 440, 210 390, 250 350 Z" fill="#990044"/>
+      <path d="M 30 280 C 70 250, 120 240, 150 280 C 180 320, 160 370, 120 390 C 80 410, 40 380, 20 340 Z" fill="#FF0088" stroke="#FF99CC" stroke-width="18" stroke-linecap="round"/>
+      <path d="M 130 410 C 160 430, 190 450, 170 490" fill="none" stroke="#FF99CC" stroke-width="15" stroke-linecap="round"/>
+      <text x="250" y="230" font-family="Arial Black,Impact,sans-serif" font-size="80" font-weight="900" fill="#66002E" text-anchor="middle" letter-spacing="8">M15Y</text>
+    </svg>
+  </div>
+</div>
+<script>
+var LANG=window.__MRS_LANG__||'ru';
+if(LANG==='en'){document.querySelectorAll('[data-en]').forEach(function(el){el.textContent=el.getAttribute('data-en');});}
+</script>
+</body>
+</html></template>
+
+<template id="src-mtv"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>OS MTV Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+body,html{margin:0;padding:0;width:100%;min-height:100vh;background:transparent !important;display:flex;justify-content:center;align-items:center;font-family:'Montserrat',sans-serif;overflow:hidden;}
+.mtv-widget-container{width:100%;max-width:500px;aspect-ratio:1/1;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;box-sizing:border-box;}
+.aurora-container{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden;border-radius:50%;}
+.aurora-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.6;animation:floatAurora 12s infinite alternate cubic-bezier(0.4,0,0.2,1);}
+@keyframes floatAurora{0%{transform:translate(0%,0%) scale(1);opacity:0.5;}25%{transform:translate(30%,-20%) scale(1.3);opacity:0.8;}50%{transform:translate(-20%,30%) scale(0.8);opacity:0.6;}75%{transform:translate(10%,-30%) scale(1.5);opacity:0.9;}100%{transform:translate(-30%,10%) scale(1.1);opacity:0.5;}}
+.aurora-blob:nth-child(1){width:40%;height:40%;background:#0099FF;top:10%;left:10%;animation-delay:0s;animation-duration:14s;}
+.aurora-blob:nth-child(2){width:35%;height:35%;background:#0066FF;top:50%;right:10%;animation-delay:-3s;animation-duration:16s;}
+.aurora-blob:nth-child(3){width:30%;height:30%;background:#0044CC;bottom:10%;left:30%;animation-delay:-6s;animation-duration:18s;}
+.aurora-blob:nth-child(4){width:50%;height:50%;background:#33CCFF;top:20%;right:20%;animation-delay:-9s;animation-duration:20s;opacity:0.4;}
+.aurora-blob:nth-child(5){width:25%;height:25%;background:#FFF;bottom:40%;left:5%;animation-delay:-2s;animation-duration:15s;opacity:0.3;}
+.content-layer{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;}
+.top-text{font-size:28px;font-weight:900;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,0.6);margin-bottom:15px;letter-spacing:1.5px;text-align:center;}
+.mtv-logo-svg{width:65%;height:auto;max-width:300px;display:block;filter:drop-shadow(0 5px 20px rgba(0,0,0,0.5));}
+.bottom-text{font-size:34px;font-weight:900;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,0.7);margin-top:20px;letter-spacing:2px;text-align:center;}
+@media(max-width:600px){.mtv-widget-container{max-width:350px;}.top-text{font-size:22px;}.bottom-text{font-size:28px;}.mtv-logo-svg{width:80%;}.aurora-blob{filter:blur(50px);}}
+</style>
+</head>
+<body>
+<div class="mtv-widget-container">
+  <div class="aurora-container"><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div></div>
+  <div class="content-layer">
+    <div class="top-text" data-en="Current OS MTV">Текущая ОС MTV</div>
+    <svg class="mtv-logo-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="250" cy="250" r="240" fill="#0076FF"/>
+      <path d="M 330 30 C 400 150, 460 300, 485 390 L 440 480 C 390 350, 340 200, 330 30 Z" fill="#D1EFFF"/>
+      <path d="M 380 80 C 430 200, 475 340, 490 420 L 450 480 C 420 350, 390 220, 380 80 Z" fill="#99D6FF"/>
+      <path d="M 280 470 C 350 400, 400 280, 425 180 L 460 220 C 435 320, 380 450, 320 490 Z" fill="#D1EFFF"/>
+      <rect x="105" y="180" width="190" height="145" rx="15" fill="#D1EFFF"/>
+      <rect x="120" y="195" width="160" height="115" rx="8" fill="#FFF" opacity="0.5"/>
+      <path d="M 190 325 L 190 365 L 165 380 C 150 385, 150 400, 165 400 L 230 400 C 245 400, 245 385, 230 380 L 210 365 L 210 325 Z" fill="#D1EFFF"/>
+      <text x="250" y="160" font-family="Arial Black,Impact,sans-serif" font-size="65" font-weight="900" fill="#003399" text-anchor="middle" letter-spacing="4">MTV1</text>
+    </svg>
+    <div class="bottom-text">MTV 1</div>
+  </div>
+</div>
+<script>
+var LANG=window.__MRS_LANG__||'ru';
+if(LANG==='en'){document.querySelectorAll('[data-en]').forEach(function(el){el.textContent=el.getAttribute('data-en');});}
+</script>
+</body>
+</html></template>
+
+<template id="src-my"><!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><title>OS MY Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<style>
+body,html{margin:0;padding:0;width:100%;min-height:100vh;background:transparent !important;display:flex;justify-content:center;align-items:center;font-family:'Montserrat',sans-serif;overflow:hidden;}
+.my-widget-container{width:100%;max-width:500px;aspect-ratio:1/1;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;box-sizing:border-box;}
+.aurora-container{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:hidden;border-radius:50%;}
+.aurora-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.6;animation:floatAurora 12s infinite alternate cubic-bezier(0.4,0,0.2,1);}
+@keyframes floatAurora{0%{transform:translate(0%,0%) scale(1);opacity:0.5;}25%{transform:translate(30%,-20%) scale(1.3);opacity:0.8;}50%{transform:translate(-20%,30%) scale(0.8);opacity:0.6;}75%{transform:translate(10%,-30%) scale(1.5);opacity:0.9;}100%{transform:translate(-30%,10%) scale(1.1);opacity:0.5;}}
+.aurora-blob:nth-child(1){width:40%;height:40%;background:#FF6600;top:10%;left:10%;animation-delay:0s;animation-duration:14s;}
+.aurora-blob:nth-child(2){width:35%;height:35%;background:#FFAA00;top:50%;right:10%;animation-delay:-3s;animation-duration:16s;}
+.aurora-blob:nth-child(3){width:30%;height:30%;background:#FF4500;bottom:10%;left:30%;animation-delay:-6s;animation-duration:18s;}
+.aurora-blob:nth-child(4){width:50%;height:50%;background:#FF8800;top:20%;right:20%;animation-delay:-9s;animation-duration:20s;opacity:0.4;}
+.aurora-blob:nth-child(5){width:25%;height:25%;background:#FFF;bottom:40%;left:5%;animation-delay:-2s;animation-duration:15s;opacity:0.3;}
+.content-layer{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;}
+.top-text{font-size:28px;font-weight:900;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,0.6);margin-bottom:15px;letter-spacing:1.5px;text-align:center;}
+.my-logo-svg{width:65%;height:auto;max-width:300px;display:block;filter:drop-shadow(0 5px 20px rgba(0,0,0,0.5));}
+.bottom-version{font-size:34px;font-weight:900;color:#fff;text-shadow:0 2px 15px rgba(0,0,0,0.7);margin-top:20px;letter-spacing:2px;text-align:center;}
+@media(max-width:600px){.my-widget-container{max-width:350px;}.top-text{font-size:22px;}.bottom-version{font-size:28px;}.my-logo-svg{width:80%;}.aurora-blob{filter:blur(50px);}}
+</style>
+</head>
+<body>
+<div class="my-widget-container">
+  <div class="aurora-container"><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div><div class="aurora-blob"></div></div>
+  <div class="content-layer">
+    <div class="top-text" data-en="Current OS MY">Текущая ОС MY</div>
+    <svg class="my-logo-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="250" cy="250" r="240" fill="#FF9900"/>
+      <path d="M 330 50 C 400 150, 480 300, 480 450 L 300 480 C 350 350, 320 200, 330 50 Z" fill="#D29A68"/>
+      <path d="M 380 100 C 440 200, 490 350, 490 490 L 350 490 C 400 350, 380 200, 380 100 Z" fill="#5C3928"/>
+      <path d="M 250 480 C 350 380, 420 250, 460 150 L 490 200 C 460 300, 400 420, 310 490 Z" fill="#FCE6C9"/>
+      <text x="220" y="330" font-family="Montserrat,sans-serif" font-size="380" font-weight="900" fill="#FCE6C9" text-anchor="middle" letter-spacing="-15">3</text>
+      <text x="270" y="160" font-family="Montserrat,sans-serif" font-size="80" font-weight="900" fill="#FFF" text-anchor="middle">MY</text>
+      <path d="M 150 280 C 130 220, 200 150, 280 160 C 350 170, 380 230, 320 280 C 280 310, 220 290, 170 260" fill="none" stroke="#FF7700" stroke-width="18" stroke-linecap="round"/>
+      <path d="M 150 280 C 130 220, 200 150, 280 160" fill="none" stroke="#FFAA00" stroke-width="6" stroke-linecap="round"/>
+    </svg>
+    <div class="bottom-version" id="versionDisplay">MY 3.00</div>
+  </div>
+</div>
+<script>
+var LANG=window.__MRS_LANG__||'ru';
+if(LANG==='en'){document.querySelectorAll('[data-en]').forEach(function(el){el.textContent=el.getAttribute('data-en');});}
+document.addEventListener('DOMContentLoaded',function(){
+  var el=document.getElementById('versionDisplay');
+  var s=new Date(2026,6,17),e=new Date(2027,5,24),t=new Date();
+  if(t<s){el.textContent="MY 3.00";return;}
+  if(t>e){el.textContent="MY 3.90";return;}
+  var d=(t-s)/864e5,tot=(e-s)/864e5,di=0.9/tot;
+  el.textContent='MY '+(3+d*di).toFixed(2);
+});
+</script>
+</body>
+</html></template>
+
+<script>
+(function(){
+  'use strict';
+  window.addEventListener('error', function(e){ console.error('[MYRUNSTORE ERROR]', e.message, 'at', e.filename, ':', e.lineno); });
+
+  // ===== FIX GITHUB URLS =====
+  function fixImgUrl(url){
+    if (!url) return url;
+    return url
+      .replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\//, 'https://raw.githubusercontent.com/$1/$2/')
+      .replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\/refs\/heads\//, 'https://raw.githubusercontent.com/$1/$2/')
+      .replace(/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/raw\//, 'https://raw.githubusercontent.com/$1/$2/');
+  }
+
+  var PAGES = [
+    { id:'mysee', title:'MySee', sub:{ru:'Флагманские смартфоны компании', en:"Company's flagship smartphones"} },
+    { id:'myseetv', title:'MySeeTV', sub:{ru:'Телевизоры и медиасистемы', en:'TVs and media systems'} },
+    { id:'mwatch', title:'MWatch, Mpods', sub:{ru:'Умные часы и наушники', en:'Smart watches and headphones'}, noProducts:true },
+    { id:'myseebm', title:'MySeeBM', sub:{ru:'Бюджетные смартфоны серии MySee BM', en:'Budget smartphones of MySee BM series'} },
+    { id:'myseeab', title:'MySeeAB', sub:{ru:'Среднебюджетные смартфоны серии MySee AB', en:'Mid-range smartphones of MySee AB series'} },
+    { id:'myseepk', title:'MySeePK', sub:{ru:'Компьютеры и ноутбуки', en:'Computers and laptops'} },
+    { id:'mycharget', title:'MyCharget', sub:{ru:'Зарядные устройства и аксессуары', en:'Chargers and accessories'} },
+    { id:'myseefold', title:'MySeeFold', sub:{ru:'Складные смартфоны MySee', en:'MySee foldable smartphones'} },
+    { id:'mayumhome', title:'MayUMHome', sub:{ru:'Премиальный ИИ-продукт для дома', en:'Premium AI product for home'} },
+    { id:'myseelight', title:'MySeeLight', sub:{ru:'Умное освещение MySee', en:'MySee smart lighting'} },
+    { id:'myseechild', title:'MySeeChild', sub:{ru:'Телефоны для детей', en:'Phones for kids'} },
+    { id:'cart', title:'Корзина', sub:{ru:'Ваши выбранные устройства', en:'Your selected devices'} }
+  ];
+
+  var I18N = {
+    ru:{
+      cart:'Корзина', cartWithCount:function(n){return 'Корзина ('+n+')';},
+      addToCart:'Добавить в корзину', toCheckout:'К оформлению',
+      checkout:'Оформить заказ', buyAll:'Купить всё', remove:'Удалить',
+      total:'Итого', emptyCart:'Корзина пуста',
+      emptyCartDesc:'Добавьте устройства из разделов магазина, чтобы оформить заказ.',
+      gotoStore:'Перейти в магазин', comingSoon:'Скоро',
+      gameNote:'ВСЕ ИСПОЛЬЗУЕТСЯ В ИГРОВЫХ РАЗВЛЕЧЕНИЯХ!!!',
+      yourOrder:'Ваш заказ', finalTotal:'Итого к оплате',
+      yourEmail:'Ваш email', shippingAddress:'Адрес доставки (почта города)',
+      city:'Город', street:'Улица', house:'Дом', postal:'Индекс (необязательно)',
+      agreeDataA:'Я ', agreeDataStrong:'согласен на сбор данных', agreeDataB:' для обработки заказа',
+      buyAllBtn:'Купить всё', sending:'Отправляем...',
+      orderPlaced:'Заказ оформлен!',
+      orderPlacedDesc:'Спасибо за покупку! Мы свяжемся с вами по указанной почте.',
+      backToStore:'Вернуться в магазин',
+      memoryRAM:'Память и RAM', colorAny:'Цвет (любой с 2026 года)',
+      chosen:'Выбран', base:'Базовая',
+      fillRequired:'Заполните обязательные поля: email, город, улица, дом.',
+      errorSend:'Не удалось отправить заказ. Проверьте соединение и попробуйте снова.',
+      specs:'Характеристики', models:'моделей', from:'от',
+      priceNote:'за ', noNewOS:'Не поддерживает новые версии MY OS',
+      footer1:'САЙТ БЫЛ СОЗДАЙ ПРИ ПОМОЩИ КОМПАНИИ ', footer2:' (MAYE МАЙСАЙТ)',
+      footerDelivery:'ДОСТАВКИ ВЫПОЛНЯЮТ АВИАКОМПАНИЯ:',
+      footerCompanies:'МАЙКАРГО · МАЙМАЙ · МАЙДОСТВКА · МАЙКОМФОРТ',
+      cartNotice:'<strong>Корзина не сохраняется.</strong> Если вы закроете вкладку — товары удалятся. Пожалуйста, оформите заказ сразу.',
+      colorValueUnit:'цвет', notForSale:'Не продаётся'
+    },
+    en:{
+      cart:'Cart', cartWithCount:function(n){return 'Cart ('+n+')';},
+      addToCart:'Add to cart', toCheckout:'Checkout',
+      checkout:'Place order', buyAll:'Buy all', remove:'Remove',
+      total:'Total', emptyCart:'Your cart is empty',
+      emptyCartDesc:'Add devices from store sections to place an order.',
+      gotoStore:'Go to store', comingSoon:'Soon',
+      gameNote:'EVERYTHING IS USED IN GAME ENTERTAINMENT!!!',
+      yourOrder:'Your order', finalTotal:'Total to pay',
+      yourEmail:'Your email', shippingAddress:'Shipping address',
+      city:'City', street:'Street', house:'House', postal:'Postal code (optional)',
+      agreeDataA:'I ', agreeDataStrong:'agree to data collection', agreeDataB:' for order processing',
+      buyAllBtn:'Buy all', sending:'Sending...',
+      orderPlaced:'Order placed!',
+      orderPlacedDesc:'Thank you for your purchase! We will contact you by email.',
+      backToStore:'Back to store',
+      memoryRAM:'Memory & RAM', colorAny:'Color (any since 2026)',
+      chosen:'Selected', base:'Base',
+      fillRequired:'Please fill required fields: email, city, street, house.',
+      errorSend:'Failed to send order. Check connection and try again.',
+      specs:'Specifications', models:'models', from:'from',
+      priceNote:'for ', noNewOS:"Doesn't support new MY OS versions",
+      footer1:'SITE WAS CREATED WITH ', footer2:' (MAYE MAYSITE)',
+      footerDelivery:'DELIVERIES ARE PERFORMED BY AIRLINES:',
+      footerCompanies:'MAYCARGO · MAYMAY · MAYDELIVERY · MAYCOMFORT',
+      cartNotice:'<strong>Cart is not saved.</strong> If you close the tab — items will be removed. Please place your order right away.',
+      colorValueUnit:'color', notForSale:'Not for sale'
+    }
+  };
+
+  var CURRENCIES = {
+    RUB:{symbol:'₽',rate:1,before:false}, USD:{symbol:'$',rate:0.011,before:true},
+    KZT:{symbol:'₸',rate:5.5,before:false}, BYN:{symbol:'Br',rate:0.033,before:false}
+  };
+
+  var MEMORY_OPTS = [
+    { gb:'256 ГБ', ram:'12 ГБ', extra:0 },
+    { gb:'512 ГБ', ram:'12 ГБ', extra:5000 },
+    { gb:'512 ГБ', ram:'16 ГБ', extra:8000 },
+    { gb:'1 ТБ', ram:'16 ГБ', extra:13000 },
+    { gb:'2 ТБ', ram:'16 ГБ', extra:18000 }
+  ];
+  var MEMORY_OPTS_BM = [
+    { gb:'128 ГБ', ram:'12 ГБ', extra:0 },
+    { gb:'256 ГБ', ram:'15 ГБ', extra:5000 },
+    { gb:'512 ГБ', ram:'20 ГБ', extra:10000 }
+  ];
+
+  var COLORS = [
+    { n:'Титан', v:'#8a8a8a', nEn:'Titanium' }, { n:'Чёрный', v:'#1a1a1a', nEn:'Black' },
+    { n:'Белый', v:'#ffffff', nEn:'White' }, { n:'Синий', v:'#1d4ed8', nEn:'Blue' },
+    { n:'Зелёный', v:'#16a34a', nEn:'Green' }, { n:'Красный', v:'#dc2626', nEn:'Red' },
+    { n:'Розовый', v:'#ec4899', nEn:'Pink' }, { n:'Жёлтый', v:'#eab308', nEn:'Yellow' }
+  ];
+
+  var IMG_BASE = 'https://raw.githubusercontent.com/balovzena9-ops/mayrunwaystore/main/%D1%84%D0%BE%D1%82%D0%BE%20%D0%BC%D0%B0%D0%B9%D1%81%D0%B8/';
+  var IMG_ROOT = 'https://raw.githubusercontent.com/balovzena9-ops/mayrunwaystore/main/';
+  var FORMSPREE = 'https://formspree.io/f/mjyyyrqg';
+
+  // Красивая SVG-заглушка (серийный квадрат с M)
+  var PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ff2e6e' stop-opacity='0.15'/><stop offset='1' stop-color='%23a8004d' stop-opacity='0.35'/></linearGradient></defs><rect width='200' height='200' fill='%23120007'/><rect width='200' height='200' fill='url(%23g)'/><circle cx='100' cy='100' r='52' fill='none' stroke='%23ff2e6e' stroke-opacity='0.35' stroke-width='2'/><text x='100' y='120' font-size='62' font-family='Arial' font-weight='900' fill='%23ff2e6e' fill-opacity='0.6' text-anchor='middle'>M</text></svg>";
+
+  function imgCandidates(primaryUrl){
+    if (!primaryUrl) return [PLACEHOLDER_IMG];
+    var list = [primaryUrl];
+    try {
+      var lastSlash = primaryUrl.lastIndexOf('/');
+      var dir = primaryUrl.substring(0, lastSlash + 1);
+      var name = primaryUrl.substring(lastSlash + 1);
+      var rawName;
+      try { rawName = decodeURIComponent(name); } catch(e){ rawName = name; }
+      if (dir.indexOf(IMG_BASE) === 0){
+        list.push(IMG_ROOT + name);
+        list.push(IMG_ROOT + rawName);
+      } else if (dir === IMG_ROOT){
+        list.push(IMG_BASE + name);
+        list.push(IMG_BASE + rawName);
+      }
+      if (rawName !== name) list.push(dir + rawName);
+      if (rawName.toLowerCase() !== rawName) list.push(dir + encodeURIComponent(rawName.toLowerCase()));
+    } catch(e){}
+    var uniq = [], seen = {};
+    list.forEach(function(u){ if (!seen[u]){ seen[u]=1; uniq.push(u); } });
+    uniq.push(PLACEHOLDER_IMG);
+    return uniq;
+  }
+
+  function setImgWithFallback(img, urls){
+    var i = 0, finished = false;
+    function next(){
+      if (finished) return;
+      if (i >= urls.length){
+        finished = true;
+        img.onerror = null;
+        img.src = PLACEHOLDER_IMG;
+        return;
+      }
+      img.src = urls[i++];
+    }
+    img.onerror = next;
+    next();
+  }
+
+  var MYSEE_PRODUCTS = [
+    { name:'MySee 1', code:'M10', price:17900, img:IMG_BASE+'mysee1.jpg', noNewOS:true, specs:[['Экран','7″ · Dynamic BALO8 · 3120×1440 (MBV) · 1–125 Гц · до 2650 нит'],['Процессор','MECOvem 3 · до 5.40 ГГц'],['Память','10 ГБ (MVEE) · 450 ГБ'],['Камеры','250 / 35 / 15 (6×) / 56 (5×) Мп · фронт 15 Мп'],['Батарея','5200 мАч · 45 Вт проводная · 15 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 6 · Bluetooth 5'],['ОС','MY2.8']] },
+    { name:'MySee 1+', code:'M10+', price:18100, img:IMG_BASE+'mysee1%2B.jpg', noNewOS:true, specs:[['Экран','7.5″ · Dynamic BALO9 · 3120×1440 (MBV+) · 1–125 Гц · до 2610 нит'],['Процессор','MECOvem 4 · до 5.44 ГГц'],['Память','15 ГБ (MVEE) · 458 ГБ'],['Камеры','255 / 36 / 15 (6×) / 56 (5×) Мп · фронт 15 Мп'],['Батарея','5500 мАч · 50 Вт проводная · 15 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY2.9+']] },
+    { name:'MySee 2', code:'M20', price:20650, img:IMG_BASE+'mysee2.jpg', noNewOS:true, specs:[['Экран','7.5″ · Dynamic BALO9.5 · MYOled · 3120×1440 (MBV+) · 1–125 Гц · до 2610 нит'],['Процессор','MYR4 · до 5.44 ГГц'],['Память','15 ГБ (MVEE) · 500 ГБ'],['Камеры','255 / 36 / 15 (6×) / 56 (5×) Мп · фронт 15 Мп'],['Батарея','5505 мАч · 50 Вт проводная · 15 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY2.8']] },
+    { name:'MySee 2+', code:'M20+', price:38580, img:IMG_BASE+'mysee2%2B.jpg', specs:[['Экран','7.5″ · Dynamic MyRO9 · MYOled · 3120×1440 (MBV+) · 1–125 Гц · до 2610 нит'],['Процессор','MyRO4 · до 5.44 ГГц'],['Память','15 ГБ (MVEE) · 512 ГБ (256 / 456 / 612 ГБ)'],['Камеры','255 / 36 / 15 (6×) / 56 (5×) Мп · фронт 15 Мп'],['Батарея','5515 мАч · 50 Вт проводная · 17 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3+']] },
+    { name:'MySee 3', code:'M30', price:45990, img:IMG_BASE+'mysee3.jpg', specs:[['Экран','8.5″ · Dynamic MyRO10 · MYOled · 3120×1440 (MBV) · 1–125 Гц · до 2610 нит'],['Процессор','MYR4 · до 5.44 ГГц'],['Память','20 ГБ (MVEE) · 612 ГБ (256 / 512 / 456 ГБ)'],['Камеры','65 / 40 / 15 (9×) / 56 (20×) Мп · фронт 17 Мп'],['Батарея','5515 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3']] },
+    { name:'MySee 4 LOVEPHONE', code:'M40', price:48450, img:IMG_BASE+'mysee4.jpg', specs:[['Экран','8.5″ · Dynamic MyRO10 · MYOled · 3120×1440 (MBV) · 1–125 Гц · до 2610 нит'],['Процессор','MYR 5 · до 5.47 ГГц'],['Память','20 ГБ (MVEE) · 612 ГБ (256 / 512 / 456 ГБ)'],['Камеры','65 / 40 / 15 (9×) / 56 (20×) Мп · фронт 17 Мп'],['Батарея','5520 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3']] },
+    { name:'MySee 4+ LOVEPHONE', code:'M40+', price:50900, img:IMG_BASE+'mysee4plus.jpg', specs:[['Экран','9.5″ · Dynamic MyRO10 · MYOled · 3120×1440 (MBV+) · 1–125 Гц · до 2610 нит'],['Процессор','MYR5 · до 5.47 ГГц'],['Память','20 ГБ (MVEE) · 612 ГБ (256 / 512 / 456 ГБ)'],['Камеры','660 / 40 / 15 (10×) / 56 (20×) Мп · фронт 17 Мп'],['Батарея','5660 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3+']] },
+    { name:'MySee 5', code:'M50', price:55990, img:IMG_BASE+'mysee5.jpg', specs:[['Экран','8.5″ · Dynamic MyRO10 · MYOled · 3120×1440 (MBV) · 1–135 Гц · до 2610 нит'],['Процессор','MYR6 · до 5.50 ГГц'],['Память','20 ГБ (MVEE) · 612 ГБ (256 / 512 / 456 ГБ)'],['Камеры','655 / 40 / 15 (15×) / 56 (35×) Мп · фронт 17 Мп'],['Батарея','5680 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3']] },
+    { name:'MySee 5+', code:'M50+', price:60000, img:IMG_BASE+'mysee5%2B.jpg', specs:[['Экран','8.6″ · Dynamic MyRO10 · MYOled · 3120×1440 (MBV+) · 1–135 Гц · до 2610 нит'],['Процессор','MYR6 · до 5.50 ГГц'],['Память','20 ГБ (MVEE) · 612 ГБ (256 / 512 / 456 ГБ)'],['Камеры','655 / 40 / 15 (20×) / 56 (40×) Мп · фронт 17 Мп'],['Батарея','5690 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3+']] },
+    { name:'MySee 5++', code:'M55+', price:100000, img:IMG_BASE+'mysee5%2B%2B.jpg', specs:[['Экран','9.5″ · Dynamic MyRO11 · MYOled · 3120×1440 (MBV+) · 1–135 Гц · до 2610 нит'],['Процессор','MYR7 · до 5.55 ГГц'],['Память','20 ГБ (MVEE) · 612 ГБ (256 / 512 / 456 ГБ)'],['Камеры','655 / 40 / 15 (40×) / 56 (60×) Мп · фронт 17 Мп'],['Батарея','5980 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3+']] },
+    { name:'MySeeZERO', code:'M·ZERO', price:120500, img:IMG_BASE+'myseezero.jpg', specs:[['Экран','9.5″ · Dynamic MyRO11 · MYOled · 3120×1440 (MBV+) · 1–135 Гц · до 2610 нит'],['Толщина','5.5 мм'],['Процессор','MYR8 · до 5.58 ГГц'],['Память','20 ГБ (MVEE) · 256 / 128 ГБ'],['Камеры','655 / 15 (20×) / 56 (30×) Мп · фронт 17 Мп'],['Батарея','6800 мАч · 50 Вт проводная · 25 Вт беспроводная'],['Корпус','Титановая рамка · защита IP70'],['Прочее','ИИ MayUm · Wi-Fi 7 · Bluetooth 5.4'],['ОС','MY3']] }
+  ];
+
+  var MYSEETV_PRODUCTS = [
+    { name:'MySeeTV', price:100500, img:IMG_BASE+'myseetv.jpg', noMemory:true, specs:[['Экран','43 дюйма'],['Разрешение','4K UHD (3840×2160)'],['Частота','60 Гц'],['Звук','25 Вт'],['Платформа','MAYTV'],['Процессор','MYR3 AI MayUm3'],['Разъёмы','HDMI · USB · Wi-Fi']] },
+    { name:'MySeeTV+', price:200000, img:IMG_BASE+'myseetv%2B.jpg', noMemory:true, specs:[['Экран','77 дюймов'],['Матрица','OLED нового поколения'],['Яркость','2700 нит'],['Разрешение','8K MECO HD (7680×4320)'],['Покрытие','Матовое, антибликовое'],['Процессор','MYR5 AI MayUm5'],['Звук','60 Вт'],['Платформа','MAYTV+'],['Гейминг','165 Гц'],['Интерфейсы','Беспроводная передача сигнала'],['Разъёмы','HDMI · USB · Wi-Fi'],['Дизайн','Ультратонкий корпус']] },
+    { name:'MySeeTV BM', price:55500, img:IMG_BASE+'myseetvbm.jpg', noMemory:true, specs:[['Экран','32 дюйма'],['Разрешение','Full HD (1920×1080)'],['Частота','60 Гц'],['Звук','15 Вт'],['Платформа','MAYTV'],['Разъёмы','USB · HDMI']] }
+  ];
+
+  var MYSEEFOLD_PRODUCTS = [
+    { name:'MySee6 Fold', code:'F60', price:175000, img:IMG_BASE+'mysee6fold.jpg',
+      specs:[['ОС','MY3 · оптимизирована под складной интерфейс'],['ИИ','МайУм 2.3+ с аппаратным ИИ-чипом'],['Процессор','MyRO8 · нанотехнологичный чип'],['Сопроцессор','MYR8 · выделенный ИИ-чип'],['Дисплей','Гибкий MYOLED · ProMotion 120 Гц · незаметная складка'],['Корпус','Титановый сплав · вертикальный блок камер · матовая текстура'],['Камеры','0.5× сверхширокоугольная · 10× перископ · 25× супер-теле · макро'],['Батарея','5500 мАч (сдвоенная) · до 2 дней работы'],['Зарядка','45 Вт USB-C · 25 Вт магнитная беспроводная'],['Связь','Wi-Fi нового поколения · Bluetooth последней версии']] }
+  ];
+
+  var MYSEEBM_PRODUCTS = [
+    { name:'MySee10BM White', code:'BM10W', price:10600, img:IMG_BASE+'myseebm1.jpg', memoryOpts:MEMORY_OPTS_BM, specs:[['Экран','7.0″ · Dynamic MyRO8.0 · MYOled · 3100×1440 (MBV) · 1–120 Гц · до 2600 нит'],['Процессор','MYR3 · до 5.20 ГГц'],['Память','15 ГБ (MVEE) · 400 ГБ'],['Камеры','250 / 30 / 15 (6×) / 50 (5×) Мп · фронт 10 Мп'],['Батарея','3400 мАч · 25 Вт'],['Особенности','Титановая рамка · IP68 · Wi-Fi 5 · Bluetooth 5'],['ОС','MY3 (урезанная)']] },
+    { name:'MySee10BM Pink', code:'BM10P', price:10600, img:IMG_BASE+'myseebm1pink.jpg', memoryOpts:MEMORY_OPTS_BM, specs:[['Экран','7.0″ · Dynamic MyRO8.0 · MYOled · 3100×1440 (MBV) · 1–120 Гц · до 2600 нит'],['Процессор','MYR3 · до 5.20 ГГц'],['Память','15 ГБ (MVEE) · 400 ГБ'],['Камеры','250 / 30 / 15 (6×) / 50 (5×) Мп · фронт 10 Мп'],['Батарея','3400 мАч · 25 Вт'],['Особенности','Титановая рамка · IP68 · Wi-Fi 5 · Bluetooth 5'],['ОС','MY3 (урезанная)']] },
+    { name:'MySee20MB', code:'BM20', price:15660, img:IMG_BASE+'myseebm2.jpg', memoryOpts:MEMORY_OPTS_BM, specs:[['Экран','5.5″ · Dynamic MyRO8.5 · MYOled · 3100×1440 (MBV) · 1–120 Гц · до 2600 нит'],['Процессор','MYR3 · до 5.20 ГГц'],['Память','10 ГБ (MVEE) · 256 ГБ'],['Камеры','250 / 30 / 15 (6×) Мп · фронт 10 Мп'],['Батарея','4400 мАч · 25 Вт'],['Особенности','Титановая рамка · IP68 · Wi-Fi 5 · Bluetooth 5'],['ОС','MY3 (урезанная)']] },
+    { name:'MySee20BM-', code:'BM20-', price:18660, img:IMG_BASE+'myseebm2-.jpg', memoryOpts:MEMORY_OPTS_BM, specs:[['Экран','6.0″ · Dynamic MyRO8.5 · MYOled · 3100×1440 (MBV) · 1–120 Гц · до 2600 нит'],['Процессор','MYR3- · до 5.20 ГГц'],['Память','15 ГБ (MVEE) · 400 ГБ'],['Камеры','250 / 30 / 15 (6×) / 50 (5×) Мп · фронт 10 Мп'],['Батарея','4700 мАч · 25 Вт'],['Особенности','Титановая рамка · IP68 · Wi-Fi 5 · Bluetooth 5'],['ОС','MY3 (урезанная)']] }
+  ];
+
+  var MYSEEAB_MEMORY = [
+    { gb:'128 ГБ', ram:'6 ГБ', extra:0 }, { gb:'256 ГБ', ram:'12 ГБ', extra:5000 },
+    { gb:'512 ГБ', ram:'15 ГБ', extra:10000 }, { gb:'612 ГБ', ram:'18 ГБ', extra:15000 }
+  ];
+
+  var MYSEEAB_PRODUCTS = [
+    { name:'MySeeAB', code:'AB1', price:35000, img:IMG_BASE+'myseeab.jpg', memoryOpts:MYSEEAB_MEMORY,
+      specs:[['Экран','6.7″ · MYOled · 2340×1080'],['Процессор','MYR4'],['Аккумулятор','3500 мАч'],['Камеры','0.5× · 5× (до 10×) · фронт 13 Мп · LiDAR'],['Память','6/128 · 12/256 · 15/512 · 18/612 ГБ'],['Защита','IP69'],['ОС','MY3 (урезанная)']] }
+  ];
+
+  var MYCHARGET_PRODUCTS = [
+    { name:'MyCharget', code:'CHG1', price:15500, img:IMG_BASE+'mycharger.jpg', noMemory:true,
+      specs:[['LED-лента','светится при зарядке · LEDmy 2'],['Беспроводная зарядка','центральная 25 Вт'],['Беспроводная зарядка','снизу 20 Вт'],['Подставка','для телефонов до 300 грамм']] }
+  ];
+
+  var MYSEECHILD_MEMORY = [
+    { gb:'128 ГБ', ram:'6 ГБ', extra:0 }, { gb:'256 ГБ', ram:'12 ГБ', extra:5000 }, { gb:'512 ГБ', ram:'15 ГБ', extra:10000 }
+  ];
+
+  var MYSEECHILD_PRODUCTS = [
+    { name:'MySeeChild', code:'CH1', price:22000, img:IMG_BASE+'myseechild.jpg', memoryOpts:MYSEECHILD_MEMORY,
+      specs:[['Экран','5.4″ · MYOled · 2340×1080'],['Процессор','MYR3'],['Аккумулятор','3000 мАч'],['Камеры','0.5× · 5× (до 10×) · фронт 13 Мп'],['Память','6/128 · 12/256 · 15/512 ГБ'],['Защита','IP68'],['ОС','MY3 (урезанная)']] }
+  ];
+
+  var MYSEELIGHT_MEMORY = [
+    { gb:'256 ГБ', ram:'14 ГБ', extra:0 }, { gb:'416 ГБ', ram:'14 ГБ', extra:5000 },
+    { gb:'512 ГБ', ram:'16 ГБ', extra:10000 }, { gb:'612 ГБ', ram:'16 ГБ', extra:15000 }
+  ];
+
+  var MYSEELIGHT_PRODUCTS = [
+    { name:'MySeeLight', code:'LT1', price:99500, img:IMG_BASE+'myseelight.jpg', memoryOpts:MYSEELIGHT_MEMORY,
+      specs:[['Экран','MyROLED нового поколения · плоская матрица · минимальные рамки'],['Процессор','MYR8 · кастомный чипсет'],['Нейропроцессор','MYUR7 · ИИ для MAU4.5+'],['Память','14/16 ГБ RAM · 256 / 416 / 512 / 612 ГБ ROM'],['Камеры','основной блок: 3 камеры + LiDAR-подобный датчик'],['Нижний блок','доп. датчик + двойная LED-вспышка'],['Батарея','5570 мАч']] }
+  ];
+
+  var MAYUMHOME_PRODUCTS = [
+    { name:'MayUm1', price:10500, img:IMG_BASE+'mayum1.jpg', noMemory:true, specs:[['Мощность','55 Вт'],['НЧ-динамики','2 × 46×80 мм'],['Широкополосные','3 × 32 мм'],['Пассивные излучатели','2 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/6 ГГц · Bluetooth'],['Размеры','201×132×132 мм'],['Вес','1.76 кг'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUm 1+', price:13550, img:IMG_BASE+'mayum1plus.jpg', noMemory:true, specs:[['Мощность','60 Вт'],['НЧ-динамики','3 × 46×80 мм'],['Широкополосные','3 × 32 мм'],['Пассивные излучатели','3 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/6 ГГц · Bluetooth'],['Размеры','120×60.5 мм'],['Вес','326 г'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUm2', price:12550, img:IMG_BASE+'mayum2.jpg', noMemory:true, specs:[['Мощность','24 Вт'],['НЧ-динамики','3 × 46×80 мм'],['Широкополосные','3 × 32 мм'],['Пассивные излучатели','2 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/8 ГГц · Bluetooth'],['Размеры','96×96×110 мм'],['Вес','900 г'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUm 3', price:11550, img:IMG_BASE+'mayum3.jpg', noMemory:true, specs:[['Мощность','60 Вт'],['НЧ-динамики','5 × 46×80 мм'],['Широкополосные','3 × 32 мм'],['Пассивные излучатели','4 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/7 ГГц · Bluetooth'],['Размеры','201×132×132 мм'],['Вес','1.76 кг'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUmMAX', price:28550, img:IMG_BASE+'mayummax.jpg', noMemory:true, specs:[['Мощность','65 Вт'],['НЧ-динамики','4 × 46×80 мм'],['Широкополосные','5 × 32 мм'],['Пассивные излучатели','3 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/7 ГГц · Bluetooth'],['Размеры','141×231×141 мм'],['Вес','2.65 кг'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUmMINI', price:15550, img:IMG_BASE+'mayummini.jpg', noMemory:true, specs:[['Мощность','65 Вт'],['НЧ-динамики','5 × 46×80 мм'],['Широкополосные','4 × 32 мм'],['Пассивные излучатели','4 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/8 ГГц · Bluetooth'],['Размеры','150×125×50 мм'],['Вес','500 г'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUmMAXMINI', price:25550, img:IMG_BASE+'mayummaxmini.jpg', noMemory:true, specs:[['Мощность','66 Вт'],['НЧ-динамики','5 × 46×80 мм'],['Широкополосные','4 × 32 мм'],['Пассивные излучатели','4 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/9 ГГц · Bluetooth'],['Размеры','170×150×70 мм'],['Вес','780 г'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MayUm Mini+', price:30550, img:IMG_BASE+'mayumsaund.jpg', noMemory:true, specs:[['Мощность','70 Вт'],['НЧ-динамики','6 × 46×80 мм'],['Широкополосные','6 × 32 мм'],['Пассивные излучатели','4 × 62×100 мм'],['Дисплей','пиксельный LED'],['Связь','Wi-Fi 2.5/9 ГГц · Bluetooth'],['Размеры','400×650×50 мм'],['Вес','1.76 кг'],['Материалы','акустическая ткань, пластик']] },
+    { name:'MyWM [MWM 10]', code:'MWM10', price:175000, img:IMG_BASE+'mywm.jpg', noMemory:true, specs:[['Мотор','MR10 · бесшумный инверторный магнитный'],['Анти-прыжок','сверхжёсткие адаптивные подвески и амортизаторы'],['Акустика','тихий залив и тихий слив воды'],['Процессор','ИИ-чип последнего поколения'],['Распознавание','ИИ МайУм определяет тип ткани и подбирает режим'],['Голос','полное управление голосом без контакта'],['Экран','безрамочный сенсорный · построчное меню'],['Экосистема','MySee · MY2.3+ · синхронизация'],['Magic Touch','лоток и люк · 1 и 2 нажатия'],['Умное расписание','Ночной режим 22:00–7:00'],['Барабан','15 кг · нержавеющая сталь'],['Расход воды','на 45% меньше обычных'],['Энергокласс','A+++ −50%'],['Цвета','Ice White · Space Black'],['Wi-Fi','удалённое управление из любой точки'],['Bluetooth','прямая связь с MySee в радиусе комнаты'],['Гарантия','мотор 15 лет · барабан пожизненно · корпус 10 лет']] },
+    { name:'MyWM [MWM 10+]', code:'MWM10+', price:215000, img:IMG_BASE+'mywmplus.jpg', noMemory:true, specs:[['Всё от MyWM [MWM 10]','+ функции ниже'],['Барабан','16 кг · нержавеющая сталь'],['Smart-аккумулятор','встроенная батарея высокой плотности'],['Автономность','1–2 полных цикла с подогревом и отжимом'],['При отключении','тихое уведомление + продолжение стирки'],['Энергосбережение','отключаются фоновые анимации, Magic Touch (кроме открытия), звуки'],['Приоритет','нагрев · мотор MR10 · насосы'],['По восстановлении','экран возвращает яркость · автозарядка после программы'],['Визуализация','анимация наполнения батареи в неоново-розовых тонах'],['Вежливый диалог','дружелюбное сообщение вместо ошибки'],['Отложенная стирка','автозапуск при 100% заряде + push-уведомление'],['Цвета','Ice White · Space Black']] }
+  ];
+
+  // ВАЖНО: MyPK+ без img — будет показана SVG-заглушка
+  var MYSEEPK_PRODUCTS = [
+    { name:'MyPK30', code:'PK30', price:460980, img:IMG_BASE+'mypk30.jpg', noMemory:true, specs:[
+      ['Процессор','Чип MЙ6 · 4-нм, 2-е поколение'],['CPU/GPU','10 ядер'],['Память','20 ГБ минимум · до 512 ГБ'],
+      ['Дисплей','сенсорный · 25.3″ · 8K Retina (4480×2520) · 510 нит'],
+      ['Камера','фронтальная 17 Мп'],['Звук','6 динамиков · BaloAudio · студийные микрофоны'],
+      ['Порты','4 × USB-C · Thunderbolt 4'],['Связь','Wi-Fi 7 · Bluetooth 5.4'],['ИИ','МайУм последней версии']
+    ]},
+    { name:'MyPK+', code:'PK+', notForSale:true, noMemory:true, specs:[
+      ['Статус','Не продаётся']
+    ]},
+    { name:'MNBook', code:'MNB1', price:47550, img:IMG_BASE+'mnbook.jpg', noMemory:true, specs:[
+      ['Процессор','Чип MБ5 · базовая версия'],['Трассировка','аппаратная поддержка ray tracing'],
+      ['Дисплей','BALODIS · 1600 нит · 120 Гц'],['RAM','16 ГБ минимум · до 256 ГБ'],
+      ['Накопитель','от 512 ГБ'],['Порты','3 порта'],['Слоты','MECO 7 (зарядка) · HDMI 8K · SDXC'],
+      ['Камера','17 Мп'],['Цвет','«Нефтяной»'],['Автономность','до 24 ч'],
+      ['Зарядка','до 70% за 35 мин']
+    ]},
+    { name:'MyPK16+', code:'PK16+', price:550000, img:IMG_ROOT+'MyPK16%2B.jpg', noMemory:true, specs:[
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','144 Гц'],
+      ['Управление','сенсорный · мультитач'],['Конструкция','ультратонкий безрамочный · поворотный шарнир'],
+      ['Процессор','MYR8PK'],['ИИ-сопроцессор','MYUR8PK · MAU 4.8+'],
+      ['Аккумулятор','15 550 мАч · авто-переход при потере питания · 144→60 Гц'],
+      ['Камера','фронтальная 12 Мп'],['Стилус','встроенный · хранение и зарядка внутри'],
+      ['Порты','3 × USB · 1 × USB-C']
+    ]},
+    { name:'MyPK16', code:'PK16', price:255000, img:IMG_ROOT+'MyPK16.jpg', noMemory:true, specs:[
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','120 Гц'],
+      ['Конструкция','уменьшенный экран · чуть шире моноблок'],
+      ['Процессор','MYR8PK'],['ИИ-сопроцессор','MYUR8PK · MAU 4.8+'],
+      ['Аккумулятор','нет · питание от сети'],
+      ['Камера','фронтальная 12 Мп'],['Порты','3 × USB · 1 × USB-C']
+    ]},
+    { name:'MyPK16BM', code:'PK16BM', price:79000, img:IMG_ROOT+'MyPK16BM.jpg', noMemory:true, specs:[
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','60 Гц'],
+      ['Конструкция','уменьшенный экран · компактный корпус'],
+      ['Процессор','MYR12.5PK · бюджетный'],['ИИ-сопроцессор','MYUR7.5PK · бюджетный'],
+      ['ОС','облегчённая (урезанная)'],
+      ['Аккумулятор','нет · питание от сети'],
+      ['Камера','фронтальная 8 Мп'],['Порты','2 × USB · 1 × USB-C']
+    ]},
+    { name:'MNBook 2 Ultra', code:'MNB2U', price:219990, img:IMG_ROOT+'MNBook2Ultra.jpg', noMemory:true, specs:[
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','140 Гц'],
+      ['Управление','сенсорный · мультитач'],
+      ['Процессор','MYR8PK флагманский'],['ИИ-сопроцессор','MYUR8PK флагманский · MAU 4.8+'],
+      ['Биометрия','Touch ID в клавиатуре · Face ID'],
+      ['Аккумулятор','30 800 мАч'],
+      ['Камера','фронтальная 12 Мп'],['Клавиатура','RU/EN'],
+      ['Порты','3 × USB-C · 2 × USB-A']
+    ]},
+    { name:'MNBook 2+', code:'MNB2+', price:189990, img:IMG_ROOT+'MNBook2%2B.jpg', noMemory:true, specs:[
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','120 Гц'],
+      ['Управление','сенсорный · мультитач'],['Габариты','меньше площадь экрана · шире профиль'],
+      ['Процессор','MYR8PK флагманский'],['ИИ-сопроцессор','MYUR8PK флагманский · MAU 4.8+'],
+      ['Биометрия','Touch ID в клавиатуре · Face ID'],
+      ['Аккумулятор','27 550 мАч'],
+      ['Камера','фронтальная 12 Мп'],['Клавиатура','RU/EN'],
+      ['Порты','3 × USB-C · 1 × USB-A']
+    ]},
+    { name:'MNBook2', code:'MNB2', price:139990, img:IMG_ROOT+'MNBook2.jpg', noMemory:true, specs:[
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','60 Гц'],
+      ['Управление','стандартное · без сенсора'],['Габариты','меньше 2+ · флагманская архитектура'],
+      ['Процессор','MYR8PK флагманский'],['ИИ-сопроцессор','MYUR8PK флагманский · MAU 4.8+'],
+      ['Аккумулятор','26 500 мАч'],
+      ['Камера','фронтальная 8 Мп · Sub-display (под экраном)'],
+      ['Клавиатура','RU/EN'],['Порты','3 × USB-C · 1 × USB-A']
+    ]},
+    { name:'MNBook2BM', code:'MNB2BM', price:69990, img:IMG_ROOT+'MNBook2BM.jpg', noMemory:true, specs:[
+      ['Процессор','MYR12.5PK · бюджетный'],['ИИ-сопроцессор','MYUR7.5PK · бюджетный'],
+      ['ОС','облегчённая (урезанная)'],
+      ['Матрица','MYOledPK'],['Технология','Dynamic MyRO13PK'],['Частота','60 Гц'],
+      ['Габариты','самый маленький экран · шире и тяжелее'],
+      ['Биометрия','Touch ID · без Face ID'],
+      ['Камера','фронтальная 8 Мп'],['Клавиатура','RU/EN'],
+      ['Порты','2 × USB-C · 1 × USB-A']
+    ]}
+  ];
+
+  var PAGE_PRODUCTS = {
+    'mysee':{ data:MYSEE_PRODUCTS, eyebrow:{ru:'Коллекция MySee',en:'MySee Collection'}, title:{ru:'Флагманская линейка',en:'Flagship lineup'} },
+    'myseetv':{ data:MYSEETV_PRODUCTS, eyebrow:{ru:'Коллекция MySeeTV',en:'MySeeTV Collection'}, title:{ru:'Телевизоры и медиа',en:'TVs and media'} },
+    'myseefold':{ data:MYSEEFOLD_PRODUCTS, eyebrow:{ru:'Коллекция MySeeFold',en:'MySeeFold Collection'}, title:{ru:'Складные смартфоны',en:'Foldable smartphones'} },
+    'myseebm':{ data:MYSEEBM_PRODUCTS, eyebrow:{ru:'Коллекция MySeeBM',en:'MySeeBM Collection'}, title:{ru:'Бюджетные смартфоны',en:'Budget smartphones'} },
+    'myseeab':{ data:MYSEEAB_PRODUCTS, eyebrow:{ru:'Коллекция MySeeAB',en:'MySeeAB Collection'}, title:{ru:'Среднебюджетные смартфоны',en:'Mid-range smartphones'} },
+    'myseepk':{ data:MYSEEPK_PRODUCTS, eyebrow:{ru:'Коллекция MySeePK',en:'MySeePK Collection'}, title:{ru:'Компьютеры и ноутбуки',en:'Computers & laptops'} },
+    'mycharget':{ data:MYCHARGET_PRODUCTS, eyebrow:{ru:'Коллекция MyCharget',en:'MyCharget Collection'}, title:{ru:'Зарядные устройства',en:'Chargers'} },
+    'myseechild':{ data:MYSEECHILD_PRODUCTS, eyebrow:{ru:'Коллекция MySeeChild',en:'MySeeChild Collection'}, title:{ru:'Телефоны для детей',en:'Phones for kids'} },
+    'myseelight':{ data:MYSEELIGHT_PRODUCTS, eyebrow:{ru:'Коллекция MySeeLight',en:'MySeeLight Collection'}, title:{ru:'Умное освещение',en:'Smart lighting'} },
+    'mayumhome':{ data:MAYUMHOME_PRODUCTS, eyebrow:{ru:'Коллекция MayUMHome',en:'MayUMHome Collection'}, title:{ru:'Умный дом и аудио',en:'Smart home & audio'} }
+  };
+
+  var currentLang = 'ru';
+  var currentCurrency = 'RUB';
+  var currentIface = 'auto';
+  var cart = [];
+  var navEl = null, mainEl = null;
+
+  function t(k){ return I18N[currentLang][k]; }
+  function fmtNum(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function colorName(c){ return currentLang==='en' ? (c.nEn || c.n) : c.n; }
+  function memGB(gb){ return currentLang==='en' ? gb.replace(/ГБ/g,'GB').replace(/ТБ/g,'TB') : gb; }
+  function memRAM(ram){ return currentLang==='en' ? ram.replace(/ГБ/g,'GB') : ram; }
+
+  function translateSpecKey(k){
+    if (currentLang !== 'en') return k;
+    var map = {'Экран':'Display','Процессор':'Processor','Память':'Memory','Камеры':'Cameras','Батарея':'Battery','Корпус':'Body','Прочее':'Other','ОС':'OS','Толщина':'Thickness','Аккумулятор':'Battery','Защита':'Protection','Матрица':'Matrix','Яркость':'Brightness','Разрешение':'Resolution','Покрытие':'Coating','Звук':'Sound','Платформа':'Platform','Гейминг':'Gaming','Интерфейсы':'Interfaces','Разъёмы':'Ports','Дизайн':'Design','Сопроцессор':'Coprocessor','Дисплей':'Display','Связь':'Connectivity','ИИ':'AI','Зарядка':'Charging','Особенности':'Features','Нейропроцессор':'Neural processor','Нижний блок':'Bottom block','LED-лента':'LED strip','Беспроводная зарядка':'Wireless charging','Подставка':'Stand','Основной блок':'Main block','Мощность':'Power','НЧ-динамики':'Woofers','Широкополосные':'Full-range','Пассивные излучатели':'Passive radiators','Размеры':'Dimensions','Вес':'Weight','Материалы':'Materials','Мотор':'Motor','Анти-прыжок':'Anti-jump','Акустика':'Acoustics','Распознавание':'Recognition','Голос':'Voice','Magic Touch':'Magic Touch','Умное расписание':'Smart schedule','Барабан':'Drum','Расход воды':'Water use','Энергокласс':'Energy class','Цвета':'Colors','Гарантия':'Warranty','Smart-аккумулятор':'Smart battery','Автономность':'Autonomy','При отключении':'On power loss','Энергосбережение':'Power saving','Приоритет':'Priority','По восстановлении':'On restore','Визуализация':'Visualization','Вежливый диалог':'Polite dialog','Отложенная стирка':'Deferred wash','Всё от MyWM [MWM 10]':'All from MyWM [MWM 10]','CPU/GPU':'CPU/GPU','Камера':'Camera','Порты':'Ports','Статус':'Status','Трассировка':'Ray tracing','Накопитель':'Storage','Слоты':'Slots','Цвет':'Color','Конструкция':'Design','Управление':'Control','Стилус':'Stylus','Биометрия':'Biometrics','Клавиатура':'Keyboard','Габариты':'Dimensions','Технология':'Technology','Частота':'Refresh rate','RAM':'RAM','Зарядка':'Charging'};
+    return map[k] || k;
+  }
+
+  function translateSpecValue(v){
+    if (currentLang !== 'en') return v;
+    var reps = [['мАч','mAh'],[' Вт ',' W '],[' Вт','W'],['ГГц','GHz'],['Мп','MP'],['ГБ','GB'],['ТБ','TB'],['нит','nits'],['дюймов','inches'],['дюйма','inches'],['дюйм','inch'],['мм','mm'],['Титановая рамка','Titanium frame'],['защита','protection'],['проводная','wired'],['беспроводная','wireless'],['адаптивная частота','adaptive refresh rate'],['яркость до','brightness up to'],['до ','up to '],['ИИ ','AI '],['ИИ','AI'],['оптимизирована под складной интерфейс','optimized for foldable interface'],['с аппаратным ИИ-чипом','with hardware AI chip'],['нанотехнологичный чип','nano-tech chip'],['выделенный ИИ-чип','dedicated AI chip'],['Гибкий','Flexible'],['незаметная складка','invisible crease'],['Титановый сплав','Titanium alloy'],['вертикальный блок камер','vertical camera block'],['матовая текстура','matte texture'],['сверхширокоугольная','ultra-wide'],['перископ','periscope'],['супер-теле','super-tele'],['макро','macro'],['сдвоенная','dual'],['дней работы','days of use'],['магнитная','magnetic'],['Wi-Fi нового поколения','next-gen Wi-Fi'],['Bluetooth последней версии','latest Bluetooth'],['кастомный чипсет','custom chipset'],['светится при зарядке','lights up when charging'],['центральная','central'],['снизу','bottom'],['для телефонов до 300 грамм','for phones up to 300 grams'],['нового поколения','new generation'],['плоская матрица','flat matrix'],['минимальные рамки','minimal bezels'],['основной блок','main block'],['доп. датчик','extra sensor'],['двойная','dual'],['LiDAR-подобный датчик','LiDAR-like sensor'],['Основная','Main'],['телеобъективы','telephoto'],['Фронтальная камера','Front camera'],['Аккумулятор','Battery'],['оперативной','RAM'],['встроенная','built-in'],['Матовое, антибликовое','Matte, anti-glare'],['MY3 (урезанная)','MY3 (cut-down)'],['бесшумный инверторный магнитный','silent inverter magnetic'],['сверхжёсткие адаптивные подвески и амортизаторы','rigid adaptive suspensions & shock absorbers'],['тихий залив и тихий слив воды','quiet fill & quiet drain'],['ИИ-чип последнего поколения','latest gen AI chip'],['ИИ МайУм определяет тип ткани и подбирает режим','MayUm AI detects fabric & picks mode'],['полное управление голосом без контакта','full voice control, no contact'],['безрамочный сенсорный · построчное меню','frameless touch · row-by-row menu'],['MySee · MY2.3+ · синхронизация','MySee · MY2.3+ · sync'],['лоток и люк · 1 и 2 нажатия','tray & door · 1 & 2 presses'],['Ночной режим 22:00–7:00','Night mode 22:00–7:00'],['15 кг · нержавеющая сталь','15 kg · stainless steel'],['16 кг · нержавеющая сталь','16 kg · stainless steel'],['на 45% меньше обычных','45% less than usual'],['A+++ −50%','A+++ -50%'],['Ice White · Space Black','Ice White · Space Black'],['удалённое управление из любой точки','remote control from anywhere'],['прямая связь с MySee в радиусе комнаты','direct link to MySee within room'],['мотор 15 лет · барабан пожизненно · корпус 10 лет','motor 15 years · drum lifetime · body 10 years'],['встроенная батарея высокой плотности','built-in high-density battery'],['1–2 полных цикла с подогревом и отжимом','1–2 full cycles with heating & spin'],['тихое уведомление + продолжение стирки','silent notification + continue wash'],['отключаются фоновые анимации, Magic Touch (кроме открытия), звуки','background animations, Magic Touch (except open) & sounds disabled'],['нагрев · мотор MR10 · насосы','heating · MR10 motor · pumps'],['экран возвращает яркость · автозарядка после программы','screen restores brightness · autocharge after program'],['анимация наполнения батареи в неоново-розовых тонах','neon-pink battery fill animation'],['дружелюбное сообщение вместо ошибки','friendly message instead of error'],['автозапуск при 100% заряде + push-уведомление','auto-start at 100% + push notification'],['пиксельный LED','pixel LED'],['акустическая ткань, пластик','acoustic fabric, plastic'],['Чип MЙ6 · 4-нм, 2-е поколение','MЙ6 chip · 4nm, 2nd gen'],['10 ядер','10 cores'],['20 ГБ минимум · до 512 ГБ','20 GB min · up to 512 GB'],['сенсорный · 25.3″ · 8K Retina (4480×2520) · 510 нит','touch · 25.3″ · 8K Retina (4480×2520) · 510 nits'],['фронтальная 17 Мп','front 17 MP'],['6 динамиков · BaloAudio · студийные микрофоны','6 speakers · BaloAudio · studio mics'],['4 × USB-C · Thunderbolt 4','4 × USB-C · Thunderbolt 4'],['Wi-Fi 7 · Bluetooth 5.4','Wi-Fi 7 · Bluetooth 5.4'],['МайУм последней версии','MayUm latest'],['Не продаётся','Not for sale'],['Чип MБ5 · базовая версия','MБ5 chip · base version'],['аппаратная поддержка ray tracing','hardware ray tracing'],['BALODIS · 1600 нит · 120 Гц','BALODIS · 1600 nits · 120 Hz'],['16 ГБ минимум · до 256 ГБ','16 GB min · up to 256 GB'],['от 512 ГБ','from 512 GB'],['3 порта','3 ports'],['MECO 7 (зарядка) · HDMI 8K · SDXC','MECO 7 (charging) · HDMI 8K · SDXC'],['17 Мп','17 MP'],['«Нефтяной»','"Oil"'],['до 24 ч','up to 24 h'],['до 70% за 35 мин','to 70% in 35 min'],['MYOledPK','MYOledPK'],['Dynamic MyRO13PK','Dynamic MyRO13PK'],['144 Гц','144 Hz'],['120 Гц','120 Hz'],['140 Гц','140 Hz'],['60 Гц','60 Hz'],['сенсорный · мультитач','touch · multi-touch'],['ультратонкий безрамочный · поворотный шарнир','ultra-thin bezel-less · rotating hinge'],['MYR8PK','MYR8PK'],['MYUR8PK · MAU 4.8+','MYUR8PK · MAU 4.8+'],['15 550 мАч · авто-переход при потере питания · 144→60 Гц','15 550 mAh · auto-switch on power loss · 144→60 Hz'],['фронтальная 12 Мп','front 12 MP'],['встроенный · хранение и зарядка внутри','built-in · stored & charged inside'],['3 × USB · 1 × USB-C','3 × USB · 1 × USB-C'],['уменьшенный экран · чуть шире моноблок','smaller screen · slightly wider body'],['нет · питание от сети','none · mains only'],['уменьшенный экран · компактный корпус','smaller screen · compact body'],['MYR12.5PK · бюджетный','MYR12.5PK · budget'],['MYUR7.5PK · бюджетный','MYUR7.5PK · budget'],['облегчённая (урезанная)','lightweight (cut-down)'],['фронтальная 8 Мп','front 8 MP'],['2 × USB · 1 × USB-C','2 × USB · 1 × USB-C'],['MYR8PK флагманский','MYR8PK flagship'],['MYUR8PK флагманский · MAU 4.8+','MYUR8PK flagship · MAU 4.8+'],['Touch ID в клавиатуре · Face ID','Touch ID in keyboard · Face ID'],['30 800 мАч','30 800 mAh'],['RU/EN','RU/EN'],['3 × USB-C · 2 × USB-A','3 × USB-C · 2 × USB-A'],['меньше площадь экрана · шире профиль','smaller screen · thicker profile'],['27 550 мАч','27 550 mAh'],['3 × USB-C · 1 × USB-A','3 × USB-C · 1 × USB-A'],['стандартное · без сенсора','standard · no touch'],['меньше 2+ · флагманская архитектура','smaller than 2+ · flagship architecture'],['26 500 мАч','26 500 mAh'],['фронтальная 8 Мп · Sub-display (под экраном)','front 8 MP · sub-display (under screen)'],['самый маленький экран · шире и тяжелее','smallest screen · wider & heavier'],['Touch ID · без Face ID','Touch ID · no Face ID'],['+ функции ниже','+ features below']];
+    for (var i=0;i<reps.length;i++){ v = v.split(reps[i][0]).join(reps[i][1]); }
+    return v;
+  }
+
+  function formatPrice(rub){ var c=CURRENCIES[currentCurrency]; var val=Math.round(rub*c.rate); var str=fmtNum(val); return c.before?c.symbol+str:str+' '+c.symbol; }
+  function formatPriceHTML(rub){ var c=CURRENCIES[currentCurrency]; var val=Math.round(rub*c.rate); var str=fmtNum(val); return c.before?'<small>'+c.symbol+'</small>'+str:str+' <small>'+c.symbol+'</small>'; }
+  function getPriceNote(p){ if (p.noMemory) return ''; var opts = p.memoryOpts || MEMORY_OPTS; return t('priceNote') + memGB(opts[0].gb); }
+  function getMemoryOpts(item){ return item.memoryOpts || MEMORY_OPTS; }
+  function getProductKey(p){ return p.code || p.name; }
+  function isInCart(key){ for(var i=0;i<cart.length;i++){if(cart[i].key===key)return true;}return false; }
+  function widgetHTML(id){ var tpl=document.getElementById('src-'+id); return tpl?tpl.innerHTML:''; }
+  function makeFrame(srcId, cssClass){
+    var f=document.createElement('iframe');
+    f.className='embed '+cssClass;
+    f.setAttribute('loading','lazy');
+    var html = widgetHTML(srcId);
+    html = html.replace(/<head>/, '<head><scr'+'ipt>window.__MRS_LANG__="'+currentLang+'";</scr'+'ipt>');
+    f.srcdoc = html;
+    return f;
+  }
+
+  function addToCart(p){
+    if (p.notForSale) return;
+    var key = getProductKey(p);
+    if (isInCart(key)) return;
+    cart.push({ key:key, name:p.name, code:p.code||'', price:p.price, img:p.img||null, noMemory:!!p.noMemory, memoryOpts:p.memoryOpts||null, specs:p.specs, config:{ memoryIdx:0, colorValue:COLORS[0].v, colorName:COLORS[0].n } });
+    updateNavCart();
+  }
+  function removeFromCart(key){ for(var i=0;i<cart.length;i++){ if(cart[i].key===key){ cart.splice(i,1); break; } } updateNavCart(); }
+  function itemPrice(item){ if (item.noMemory) return item.price; var opt = getMemoryOpts(item)[item.config.memoryIdx]; return item.price + (opt ? opt.extra : 0); }
+  function cartTotal(){ return cart.reduce(function(s,item){ return s + itemPrice(item); },0); }
+
+  function updateNavCart(){
+    var btn = document.querySelector('nav button[data-target="cart"]');
+    if (!btn) return;
+    if (cart.length) { btn.textContent = t('cartWithCount')(cart.length); btn.classList.add('has-items'); }
+    else { btn.textContent = t('cart'); btn.classList.remove('has-items'); }
+  }
+
+  function createRipple(btn, e){
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    var ripple = document.createElement('span');
+    ripple.className = 'btn-ripple animate';
+    ripple.style.width = size + 'px';
+    ripple.style.height = size + 'px';
+    var xy = {x: (e.touches && e.touches[0]) ? e.touches[0].clientX : (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : e.clientX, y: (e.touches && e.touches[0]) ? e.touches[0].clientY : (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : e.clientY};
+    ripple.style.left = (xy.x - rect.left - size/2) + 'px';
+    ripple.style.top = (xy.y - rect.top - size/2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(function(){ if(ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 800);
+  }
+
+  function createAddButton(p){
+    var key = getProductKey(p);
+    var inCart = isInCart(key);
+    var btn = document.createElement('button');
+    btn.className = 'btn-add-cart' + (inCart ? ' added' : '');
+    btn.dataset.code = key;
+    btn.innerHTML = '<span class="cart-icon-stack"><svg class="cart-icon-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg><svg class="cart-icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></span><span class="btn-cart-text">' + (inCart ? t('toCheckout') : t('addToCart')) + '</span>';
+    btn.addEventListener('click', function(e){
+      if (!btn.classList.contains('added')){
+        createRipple(btn, e);
+        setTimeout(function(){
+          addToCart(p);
+          btn.classList.add('added','just-added');
+          btn.querySelector('.btn-cart-text').textContent = t('toCheckout');
+          setTimeout(function(){ btn.classList.remove('just-added'); }, 900);
+        }, 180);
+      } else { showPage('cart'); }
+    });
+    return btn;
+  }
+
+  function createProductCard(p, i){
+    var card = document.createElement('article');
+    card.className = 'ms-product' + (p.notForSale ? ' not-for-sale' : '');
+    card.style.animationDelay = (i*0.06)+'s';
+    var specsHTML = p.specs.map(function(s){ return '<div><dt>'+translateSpecKey(s[0])+'</dt><dd>'+translateSpecValue(s[1])+'</dd></div>'; }).join('');
+    var codeHTML = p.code ? '<span class="ms-product-code">'+p.code+'</span>' : '';
+    var noteText = p.notForSale ? '' : getPriceNote(p);
+    var noteHTML = noteText ? '<span class="ms-product-price-note">'+noteText+'</span>' : '';
+    var badgeHTML = p.notForSale
+      ? '<span class="ms-product-badge">'+t('notForSale')+'</span>'
+      : (p.noNewOS ? '<span class="ms-product-badge">'+t('noNewOS')+'</span>' : '');
+    var priceHTML = p.notForSale
+      ? '<div class="ms-product-price disabled">'+t('notForSale')+'</div>'
+      : '<div class="ms-product-price">'+formatPriceHTML(p.price)+noteHTML+'</div>';
+    card.innerHTML = '<div class="ms-product-image"></div><div class="ms-product-body"><div class="ms-product-head"><span class="ms-product-name">'+p.name+'</span>'+codeHTML+'</div>'+badgeHTML+priceHTML+'<details class="ms-product-specs"><summary>'+t('specs')+'</summary><dl>'+specsHTML+'</dl></details></div>';
+    var imageDiv = card.querySelector('.ms-product-image');
+    var img = document.createElement('img');
+    img.alt = p.name;
+    // MyPK+ (notForSale без img) — сразу заглушка. Остальные — обычная загрузка
+    if (p.notForSale || !p.img) {
+      img.src = PLACEHOLDER_IMG;
+    } else {
+      setImgWithFallback(img, imgCandidates(fixImgUrl(p.img)));
+    }
+    imageDiv.appendChild(img);
+    if (!p.notForSale) {
+      card.querySelector('.ms-product-body').appendChild(createAddButton(p));
+    }
+    return card;
+  }
+
+  function renderProductSection(pageId){
+    var cfg = PAGE_PRODUCTS[pageId];
+    if (!cfg) return null;
+    var sec = document.createElement('section');
+    sec.className = 'products-section';
+    var saleable = cfg.data.filter(function(p){ return !p.notForSale; });
+    var minPrice = (saleable.length ? saleable : cfg.data).reduce(function(m,p){ return p.price<m?p.price:m; }, (saleable[0]||cfg.data[0]).price);
+    var eyebrow = cfg.eyebrow[currentLang] || cfg.eyebrow.ru;
+    var title = cfg.title[currentLang] || cfg.title.ru;
+    var head = document.createElement('div');
+    head.className = 'products-head';
+    head.innerHTML = '<div><span class="products-eyebrow">'+eyebrow+'</span><h2>'+title+'</h2></div><div class="products-meta"><span>'+cfg.data.length+' '+t('models')+'</span><span>'+t('from')+' '+formatPrice(minPrice)+'</span></div>';
+    sec.appendChild(head);
+    var grid = document.createElement('div');
+    grid.className = 'products-grid-ms';
+    cfg.data.forEach(function(p,i){ grid.appendChild(createProductCard(p,i)); });
+    sec.appendChild(grid);
+    return sec;
+  }
+
+  function renderCartContent(){
+    var container = document.getElementById('cart-content');
+    if (!container) return;
+    if (!cart.length){
+      container.innerHTML = '<div class="cart-wrap"><div class="cart-empty"><h3>'+t('emptyCart')+'</h3><p>'+t('emptyCartDesc')+'</p><button class="btn-back" data-action="goto-mysee">'+t('gotoStore')+'</button></div></div>';
+      container.querySelector('[data-action="goto-mysee"]').addEventListener('click', function(){ showPage('mysee'); });
+      return;
+    }
+    var itemsHTML = cart.map(function(item){
+      var configText = '';
+      if (!item.noMemory){
+        var opt = getMemoryOpts(item)[item.config.memoryIdx];
+        configText = '<div class="cart-item-config">'+memGB(opt.gb)+' / '+memRAM(opt.ram)+' RAM · '+item.config.colorName+'</div>';
+      } else {
+        configText = '<div class="cart-item-config">'+item.config.colorName+'</div>';
+      }
+      var codeHTML = item.code ? '<div class="cart-item-code">'+item.code+'</div>' : '';
+      var imgSrc = item.img ? fixImgUrl(item.img) : PLACEHOLDER_IMG;
+      return '<div class="cart-item"><div class="cart-item-img"><img src="'+imgSrc+'" alt="'+item.name+'" onerror="this.onerror=null;this.src=\''+PLACEHOLDER_IMG+'\'"></div><div class="cart-item-body"><div class="cart-item-name">'+item.name+'</div>'+codeHTML+configText+'<div class="cart-item-price">'+formatPriceHTML(itemPrice(item))+'</div></div><div class="cart-item-actions"><button class="btn-cart-remove" data-code="'+item.key+'">'+t('remove')+'</button></div></div>';
+    }).join('');
+    container.innerHTML = '<div class="cart-wrap"><div class="cart-notice"><span class="cart-notice-icon">⚠️</span><span>'+t('cartNotice')+'</span></div><div class="cart-list">'+itemsHTML+'</div><div class="cart-summary"><div class="cart-total">'+t('total')+':<strong>'+formatPrice(cartTotal())+'</strong></div><button class="btn-cart-checkout" id="btn-cart-checkout">'+t('checkout')+'</button></div></div>';
+    container.querySelectorAll('.btn-cart-remove').forEach(function(b){
+      b.addEventListener('click', function(){ removeFromCart(b.dataset.code); renderCartContent(); });
+    });
+    var coBtn = container.querySelector('#btn-cart-checkout');
+    if (coBtn) coBtn.addEventListener('click', openCheckout);
+  }
+
+  var modal = document.getElementById('checkout-modal');
+  var modalClose = document.getElementById('modal-close');
+  function showModal(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+  function hideModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+  modalClose.addEventListener('click', hideModal);
+  modal.addEventListener('click', function(e){ if (e.target === modal) hideModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key==='Escape' && modal.classList.contains('open')) hideModal(); });
+  function openCheckout(){ if (!cart.length) return; renderCheckoutContent(); showModal(); }
+
+  function renderCheckoutContent(){
+    var container = document.getElementById('checkout-content');
+    if (!container) return;
+    if (!cart.length){ container.innerHTML = '<div class="cart-wrap"><div class="cart-empty"><h3>'+t('emptyCart')+'</h3></div></div>'; return; }
+    var itemsHTML = cart.map(function(item, idx){
+      var price = itemPrice(item);
+      var codeHTML = item.code ? '<div class="co-item-code">'+item.code+'</div>' : '';
+      var memoryBlock = '';
+      if (!item.noMemory){
+        var memOpts = getMemoryOpts(item);
+        var memHTML = memOpts.map(function(m,i){
+          var extraLabel = m.extra===0 ? '<div class="memory-extra" style="color:#7fffa0">'+t('base')+'</div>' : '<div class="memory-extra">+'+formatPrice(m.extra)+'</div>';
+          return '<label class="memory-option"><input type="radio" name="memory-'+idx+'" data-item="'+idx+'" data-idx="'+i+'" '+(i===item.config.memoryIdx?'checked':'')+'><div class="memory-option-inner"><div class="memory-main">'+memGB(m.gb)+'</div><div class="memory-sub">'+memRAM(m.ram)+' RAM</div>'+extraLabel+'</div></label>';
+        }).join('');
+        memoryBlock = '<div class="co-item-section"><div class="co-item-label">'+t('memoryRAM')+'</div><div class="co-memory-options" data-item="'+idx+'">'+memHTML+'</div></div>';
+      }
+      var colorHTML = COLORS.map(function(c){
+        var sel = c.v === item.config.colorValue;
+        var name = colorName(c);
+        return '<div class="co-color-swatch '+(sel?'selected':'')+'" data-item="'+idx+'" data-color="'+c.v+'" data-name="'+name+'" title="'+name+'" style="background:'+c.v+'"></div>';
+      }).join('');
+      var imgSrc = item.img ? fixImgUrl(item.img) : PLACEHOLDER_IMG;
+      return '<div class="co-item" data-idx="'+idx+'"><div class="co-item-img"><img src="'+imgSrc+'" alt="'+item.name+'" onerror="this.onerror=null;this.src=\''+PLACEHOLDER_IMG+'\'"></div><div class="co-item-body"><div class="co-item-head"><div><div class="co-item-name">'+item.name+'</div>'+codeHTML+'</div><div class="co-item-price" data-price-for="'+idx+'">'+formatPriceHTML(price)+'</div></div>'+memoryBlock+'<div class="co-item-section"><div class="co-item-label">'+t('colorAny')+'</div><div class="co-color-options" data-item="'+idx+'">'+colorHTML+'<label class="co-color-custom'+(item.config.colorValue===''?' selected':'')+'" data-item="'+idx+'"><input type="color" class="co-color-input" data-item="'+idx+'" value="'+(item.config.colorValue||'#ff2e6e')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></label></div><div class="co-color-chosen">'+t('chosen')+': <span data-chosen="'+idx+'">'+item.config.colorName+'</span></div></div></div></div>';
+    }).join('');
+    container.innerHTML = '<div class="co-wrap"><h2 class="co-title">'+t('yourOrder')+' <span class="co-count">'+cart.length+'</span></h2><div class="co-items">'+itemsHTML+'</div><div class="co-total-row"><span class="co-total-label">'+t('finalTotal')+'</span><span class="co-total-value" id="co-total">'+formatPrice(cartTotal())+'</span></div><form class="co-form" id="co-form" novalidate><div class="checkout-section"><label class="checkout-label">'+t('yourEmail')+'</label><input class="field" type="email" id="f-email" placeholder="user@example.com" required></div><div class="checkout-section"><label class="checkout-label">'+t('shippingAddress')+'</label><div class="field-row"><input class="field" type="text" id="f-city" placeholder="'+t('city')+'" required><input class="field" type="text" id="f-street" placeholder="'+t('street')+'" required><input class="field" type="text" id="f-house" placeholder="'+t('house')+'" required></div><input class="field" type="text" id="f-postal" placeholder="'+t('postal')+'" style="margin-top:10px"></div><label class="checkbox-wrap" id="consent-wrap"><input type="checkbox" id="f-consent"><span class="checkbox-box"></span><span class="checkbox-text">'+t('agreeDataA')+'<strong>'+t('agreeDataStrong')+'</strong>'+t('agreeDataB')+'</span></label><div class="checkout-actions"><button type="submit" class="btn-buy" id="btn-buy" disabled>'+t('buyAllBtn')+'</button><div class="game-badge">'+t('gameNote')+'</div></div></form></div>';
+    container.querySelectorAll('input[name^="memory-"]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var idx = parseInt(inp.dataset.item,10);
+        var optIdx = parseInt(inp.dataset.idx,10);
+        cart[idx].config.memoryIdx = optIdx;
+        var itemEl = container.querySelector('.co-item[data-idx="'+idx+'"] .co-item-price');
+        if (itemEl) itemEl.innerHTML = formatPriceHTML(itemPrice(cart[idx]));
+        var totEl = container.querySelector('#co-total');
+        if (totEl) totEl.textContent = formatPrice(cartTotal());
+      });
+    });
+    container.querySelectorAll('.co-color-swatch').forEach(function(sw){
+      sw.addEventListener('click', function(){
+        var idx = parseInt(sw.dataset.item,10);
+        var group = sw.parentElement;
+        group.querySelectorAll('.co-color-swatch').forEach(function(s){ s.classList.remove('selected'); });
+        var custom = group.querySelector('.co-color-custom');
+        if (custom) custom.classList.remove('selected');
+        sw.classList.add('selected');
+        cart[idx].config.colorValue = sw.dataset.color;
+        cart[idx].config.colorName = sw.dataset.name;
+        var chosen = container.querySelector('[data-chosen="'+idx+'"]');
+        if (chosen) chosen.textContent = sw.dataset.name;
+      });
+    });
+    container.querySelectorAll('.co-color-input').forEach(function(inp){
+      inp.addEventListener('input', function(){
+        var idx = parseInt(inp.dataset.item,10);
+        var group = inp.closest('.co-color-options');
+        group.querySelectorAll('.co-color-swatch').forEach(function(s){ s.classList.remove('selected'); });
+        var custom = group.querySelector('.co-color-custom');
+        if (custom) custom.classList.add('selected');
+        cart[idx].config.colorValue = inp.value;
+        cart[idx].config.colorName = inp.value.toUpperCase();
+        var chosen = container.querySelector('[data-chosen="'+idx+'"]');
+        if (chosen) chosen.textContent = cart[idx].config.colorName;
+      });
+    });
+    var consentWrap = container.querySelector('#consent-wrap');
+    var consentInp = container.querySelector('#f-consent');
+    var btnBuy = container.querySelector('#btn-buy');
+    consentInp.addEventListener('change', function(){
+      consentWrap.classList.toggle('checked', consentInp.checked);
+      btnBuy.disabled = !consentInp.checked;
+    });
+    container.querySelector('#co-form').addEventListener('submit', function(e){
+      e.preventDefault();
+      if (!consentInp.checked) return;
+      var email = container.querySelector('#f-email').value.trim();
+      var city = container.querySelector('#f-city').value.trim();
+      var street = container.querySelector('#f-street').value.trim();
+      var house = container.querySelector('#f-house').value.trim();
+      var postal = container.querySelector('#f-postal').value.trim();
+      if (!email || !city || !street || !house){ alert(t('fillRequired')); return; }
+      btnBuy.classList.add('loading');
+      btnBuy.textContent = t('sending');
+      var lines = cart.map(function(item){
+        var memInfo;
+        if (item.noMemory) memInfo = '—';
+        else {
+          var opt = getMemoryOpts(item)[item.config.memoryIdx];
+          memInfo = memGB(opt.gb)+' / '+memRAM(opt.ram)+' RAM';
+        }
+        var nameWithCode = item.code ? item.name+' ['+item.code+']' : item.name;
+        return '• '+nameWithCode+' — '+memInfo+', '+t('colorValueUnit')+' '+item.config.colorName+' ('+item.config.colorValue+') — '+formatPrice(itemPrice(item));
+      }).join('\n');
+      var data = {
+        _subject:(currentLang==='en'?'New order: ':'Новый заказ: ')+cart.length+' '+(currentLang==='en'?'item(s)':'тов.'),
+        'Состав заказа':lines,
+        'Итого (RUB)':fmtNum(cartTotal())+' ₽',
+        'Валюта клиента':currentCurrency,
+        'Язык клиента':currentLang,
+        'Email клиента':email,
+        'Город':city, 'Улица':street, 'Дом':house, 'Индекс':postal||'—',
+        'Согласие на сбор данных':'Да'
+      };
+      fetch(FORMSPREE,{ method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body:JSON.stringify(data) })
+      .then(function(res){ if (!res.ok) throw new Error('HTTP '+res.status); cart.length = 0; updateNavCart(); renderCartContent(); showSuccessMulti(); })
+      .catch(function(err){ btnBuy.classList.remove('loading'); btnBuy.textContent = t('buyAllBtn'); alert(t('errorSend')+'\n\n'+err.message); });
+    });
+  }
+
+  function showSuccessMulti(){
+    var container = document.getElementById('checkout-content');
+    container.innerHTML = '<div class="success-card"><div class="success-icon">✓</div><h2>'+t('orderPlaced')+'</h2><p>'+t('orderPlacedDesc')+'</p><button class="btn-back" data-action="goto-mysee">'+t('backToStore')+'</button></div>';
+    container.querySelector('[data-action="goto-mysee"]').addEventListener('click', function(){ hideModal(); showPage('mysee'); });
+  }
+
+  function buildApp(){
+    navEl = document.getElementById('nav');
+    mainEl = document.getElementById('main');
+    if (!navEl || !mainEl) return;
+    navEl.innerHTML = '';
+    mainEl.innerHTML = '';
+    PAGES.forEach(function(p){
+      var btn = document.createElement('button');
+      var titleText = p.id === 'cart' ? t('cart') : p.title;
+      btn.textContent = titleText;
+      btn.dataset.target = p.id;
+      if (p.id==='cart') btn.classList.add('cart-btn');
+      btn.addEventListener('click', function(){ showPage(p.id); });
+      navEl.appendChild(btn);
+      var sec = document.createElement('section');
+      sec.className = 'page';
+      sec.id = 'page-'+p.id;
+      var h = document.createElement('h1'); h.className = 'page-title'; h.textContent = p.title; sec.appendChild(h);
+      var sub = document.createElement('p'); sub.className = 'page-sub'; sub.textContent = (p.sub[currentLang] || p.sub.ru); sec.appendChild(sub);
+      if (p.id==='cart'){
+        var wrap = document.createElement('div'); wrap.id = 'cart-content'; sec.appendChild(wrap);
+      } else {
+        sec.appendChild(makeFrame('news','embed-news'));
+        sec.appendChild(makeFrame('train','embed-train'));
+        sec.appendChild(makeFrame('runway','embed-runway'));
+        sec.appendChild(makeFrame('clock','embed-clock'));
+        sec.appendChild(makeFrame('ai','embed-ai'));
+        if (PAGE_PRODUCTS[p.id]){ var ps = renderProductSection(p.id); if (ps) sec.appendChild(ps); }
+        if (p.id==='mysee'){
+          var row = document.createElement('div');
+          row.className = 'widgets-row';
+          row.appendChild(makeFrame('mau','embed-os'));
+          row.appendChild(makeFrame('m15y','embed-os'));
+          row.appendChild(makeFrame('mtv','embed-os'));
+          row.appendChild(makeFrame('my','embed-os'));
+          sec.appendChild(row);
+        }
+        sec.appendChild(makeFrame('clock','embed-clock'));
+        sec.appendChild(makeFrame('train','embed-train'));
+        if (p.noProducts || (!PAGE_PRODUCTS[p.id])) {
+          var cs = document.createElement('div');
+          cs.className = 'coming-soon';
+          cs.innerHTML = '<h2>'+t('comingSoon')+'</h2><p class="game-note">'+t('gameNote')+'</p>';
+          sec.appendChild(cs);
+        }
+      }
+      var foot = document.createElement('footer');
+      foot.className = 'disclaimer';
+      foot.innerHTML = t('footer1')+'<strong>"Mayskiy Runway"</strong>'+t('footer2')+'<br>'+t('footerDelivery')+'<br><strong>'+t('footerCompanies')+'</strong>';
+      sec.appendChild(foot);
+      mainEl.appendChild(sec);
+    });
+    updateNavCart();
+  }
+
+  function showPage(id){
+    var allPages = document.querySelectorAll('.page');
+    var allBtns = document.querySelectorAll('nav button');
+    allPages.forEach(function(el){ el.classList.remove('active'); });
+    allBtns.forEach(function(el){ el.classList.remove('active'); });
+    var page = document.getElementById('page-'+id);
+    var btn = document.querySelector('nav button[data-target="'+id+'"]');
+    if (!page) return;
+    if (id==='cart') renderCartContent();
+    page.classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (document.body.classList.contains('iface-mobile')) navEl.classList.remove('open');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  // ===== ПРЕЛОАДЕР =====
+  var preloader = document.getElementById('preloader');
+  var barEl = preloader.querySelector('.preloader-bar');
+  var pctEl = preloader.querySelector('.preloader-percent');
+  var settingsScreen = document.getElementById('settings-screen');
+  var mainApp = document.getElementById('main-app');
+  var isFirstVisit = true;
+
+  try {
+    var saved = JSON.parse(localStorage.getItem('mrs_settings') || 'null');
+    if (saved){ currentLang = saved.lang || 'ru'; currentCurrency = saved.currency || 'RUB'; currentIface = saved.iface || 'auto'; isFirstVisit = false; }
+  } catch(e){ console.warn('[MYRUNSTORE] read failed:', e); }
+
+  function collectImageUrls(){
+    var urls = new Set();
+    urls.add('https://raw.githubusercontent.com/balovzena9-ops/mayrunwaystore/main/%D1%84%D0%BE%D1%82%D0%BE%20%D0%BC%D0%B0%D0%B9%D1%81%D0%B8/myry.jpg');
+    Object.keys(PAGE_PRODUCTS).forEach(function(k){
+      PAGE_PRODUCTS[k].data.forEach(function(p){
+        if (p.img && !p.notForSale){ urls.add(fixImgUrl(p.img)); }
+      });
+    });
+    return Array.from(urls);
+  }
+
+  var imageUrls = collectImageUrls();
+  var totalImgs = imageUrls.length;
+  var progress = 0;
+  var minProgress = 0;
+
+  function setProgress(p){
+    if (p < minProgress) p = minProgress;
+    progress = Math.min(100, p);
+    barEl.style.width = progress + '%';
+    pctEl.textContent = Math.round(progress) + '%';
+  }
+
+  function preloadImages(){
+    return new Promise(function(resolve){
+      if (!totalImgs){ resolve(); return; }
+      var done = 0;
+      var resolved = false;
+      function finish(){ if (!resolved){ resolved = true; resolve(); } }
+      imageUrls.forEach(function(url){
+        var img = new Image();
+        img.onload = img.onerror = function(){
+          done++;
+          var pct = Math.floor((done / totalImgs) * 100);
+          setProgress(Math.min(95, pct));
+          if (done === totalImgs) finish();
+        };
+        img.src = url;
+      });
+      setTimeout(finish, 15000);
+    });
+  }
+
+  var fakeProgressTimer = setInterval(function(){
+    if (progress < 90) { minProgress = Math.min(90, minProgress + 3); setProgress(minProgress); }
+  }, 150);
+
+  preloadImages().then(function(){
+    clearInterval(fakeProgressTimer);
+    setProgress(100);
+    setTimeout(afterPreloader, 500);
+  });
+
+  setTimeout(function(){
+    if (preloader && !preloader.classList.contains('hidden')){
+      console.warn('[MYRUNSTORE] preloader forced');
+      clearInterval(fakeProgressTimer);
+      setProgress(100);
+      afterPreloader();
+    }
+  }, 15000);
+
+  function afterPreloader(){
+    preloader.classList.add('hidden');
+    if (isFirstVisit){ openSettings(false); } else { startApp(); }
+  }
+  function startApp(){ mainApp.style.display = ''; buildApp(); showPage('mysee'); }
+  function rebuildApp(){ mainApp.style.display = ''; buildApp(); showPage('mysee'); }
+
+  // ===== НАСТРОЙКИ =====
+  var settingsTitle = document.getElementById('settings-title');
+  var settingsSub = document.getElementById('settings-sub');
+  var settingsLangLabel = document.getElementById('settings-lang-label');
+  var settingsCurrencyLabel = document.getElementById('settings-currency-label');
+  var settingsIfaceLabel = document.getElementById('settings-iface-label');
+  var settingsContinue = document.getElementById('settings-continue');
+
+  function updateSettingsTexts(){
+    if (currentLang === 'en'){
+      settingsTitle.textContent = 'Welcome';
+      settingsSub.textContent = 'Set up language, currency & interface';
+      settingsLangLabel.textContent = 'Language';
+      settingsCurrencyLabel.textContent = 'Currency';
+      settingsIfaceLabel.textContent = 'Interface';
+      settingsContinue.textContent = 'Continue';
+      document.getElementById('iface-auto').textContent = 'Auto';
+      document.getElementById('iface-desktop').textContent = 'PC';
+      document.getElementById('iface-mobile').textContent = 'Mobile';
+    } else {
+      settingsTitle.textContent = 'Добро пожаловать';
+      settingsSub.textContent = 'Настройте язык, валюту и интерфейс';
+      settingsLangLabel.textContent = 'Язык';
+      settingsCurrencyLabel.textContent = 'Валюта';
+      settingsIfaceLabel.textContent = 'Интерфейс';
+      settingsContinue.textContent = 'Продолжить';
+      document.getElementById('iface-auto').textContent = 'Авто';
+      document.getElementById('iface-desktop').textContent = 'ПК';
+      document.getElementById('iface-mobile').textContent = 'Моб.';
+    }
+  }
+
+  function updateSettingsUI(){
+    settingsScreen.querySelectorAll('[data-lang]').forEach(function(b){ b.classList.toggle('selected', b.dataset.lang === currentLang); });
+    settingsScreen.querySelectorAll('[data-currency]').forEach(function(b){ b.classList.toggle('selected', b.dataset.currency === currentCurrency); });
+    settingsScreen.querySelectorAll('[data-iface]').forEach(function(b){ b.classList.toggle('selected', b.dataset.iface === currentIface); });
+    updateSettingsTexts();
+  }
+
+  settingsScreen.querySelectorAll('[data-lang]').forEach(function(b){
+    b.addEventListener('click', function(){ currentLang = b.dataset.lang; updateSettingsUI(); });
+  });
+  settingsScreen.querySelectorAll('[data-currency]').forEach(function(b){
+    b.addEventListener('click', function(){ currentCurrency = b.dataset.currency; updateSettingsUI(); });
+  });
+  settingsScreen.querySelectorAll('[data-iface]').forEach(function(b){
+    b.addEventListener('click', function(){ currentIface = b.dataset.iface; updateSettingsUI(); });
+  });
+
+  function applyIface(){
+    var isMobile;
+    if (currentIface === 'mobile') isMobile = true;
+    else if (currentIface === 'desktop') isMobile = false;
+    else isMobile = window.matchMedia('(max-width: 900px)').matches;
+    document.body.classList.toggle('iface-mobile', isMobile);
+    if (!isMobile && navEl) navEl.classList.remove('open');
+  }
+  window.addEventListener('resize', function(){ if (currentIface === 'auto') applyIface(); });
+
+  function openSettings(fromHeader){ updateSettingsUI(); settingsScreen.classList.add('visible'); settingsScreen.dataset.fromHeader = fromHeader ? '1' : '0'; }
+  function closeSettings(){ settingsScreen.classList.remove('visible'); }
+
+  settingsContinue.addEventListener('click', function(){
+    try { localStorage.setItem('mrs_settings', JSON.stringify({ lang: currentLang, currency: currentCurrency, iface: currentIface })); }
+    catch(e){ console.warn('[MYRUNSTORE] write failed:', e); }
+    var fromHeader = settingsScreen.dataset.fromHeader === '1';
+    closeSettings();
+    applyIface();
+    if (isFirstVisit){ isFirstVisit = false; startApp(); }
+    else if (fromHeader){ rebuildApp(); }
+  });
+
+  var settingsBtn = document.getElementById('settings-btn');
+  if (settingsBtn) settingsBtn.addEventListener('click', function(){ openSettings(true); });
+
+  var brandToggle = document.getElementById('brand-toggle');
+  if (brandToggle) brandToggle.addEventListener('click', function(){
+    if (document.body.classList.contains('iface-mobile') && navEl) {
+      navEl.classList.toggle('open');
+    }
+  });
+
+  applyIface();
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    if (typeof vkBridge !== 'undefined') {
+        vkBridge.send('VKWebAppInit').then(function(data){ if (data.result) console.log("VK Bridge запущен!"); })
+        .catch(function(error){ console.error("VK Bridge ошибка:", error); });
+    } else { console.error("Библиотека VK Bridge не найдена!"); }
+});
+</script>
+
+</body>
+</html>
