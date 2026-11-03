@@ -424,7 +424,7 @@ function w(){return track.scrollWidth/3}
 function auto(){if(!isDrag){cur-=SPEED;var t=w();if(cur<-t*1.8)cur+=t*1.7;track.style.transform='translateX('+cur+'px)'}raf=requestAnimationFrame(auto)}
 auto();
 function getClientX(e){ if (e.touches && e.touches.length) return e.touches[0].clientX; if (e.changedTouches && e.changedTouches.length) return e.changedTouches[0].clientX; return e.pageX; }
-function onDragStart(e){ isDrag=true; startX=getClientX(e)-track.getBoundingClientRect().left; cancelAnimationFrame(raf); if (e.cancelable && e.type==='touchstart') {} }
+function onDragStart(e){ isDrag=true; startX=getClientX(e)-track.getBoundingClientRect().left; cancelAnimationFrame(raf); }
 function onDragMove(e){ if(!isDrag)return; var x=getClientX(e)-track.getBoundingClientRect().left; cur+=(x-startX)*0.8; track.style.transform='translateX('+cur+'px)'; startX=x; }
 function onDragEnd(){ if(isDrag){isDrag=false; raf=requestAnimationFrame(auto);} }
 track.addEventListener('mousedown',onDragStart);
@@ -943,7 +943,6 @@ document.addEventListener('DOMContentLoaded',function(){
   'use strict';
   window.addEventListener('error', function(e){ console.error('[MYRUNSTORE ERROR]', e.message, 'at', e.filename, ':', e.lineno); });
 
-  // ===== FIX GITHUB URLS =====
   function fixImgUrl(url){
     if (!url) return url;
     return url
@@ -1055,7 +1054,6 @@ document.addEventListener('DOMContentLoaded',function(){
   var IMG_ROOT = 'https://raw.githubusercontent.com/balovzena9-ops/mayrunwaystore/main/';
   var FORMSPREE = 'https://formspree.io/f/mjyyyrqg';
 
-  // Красивая SVG-заглушка (серийный квадрат с M)
   var PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ff2e6e' stop-opacity='0.15'/><stop offset='1' stop-color='%23a8004d' stop-opacity='0.35'/></linearGradient></defs><rect width='200' height='200' fill='%23120007'/><rect width='200' height='200' fill='url(%23g)'/><circle cx='100' cy='100' r='52' fill='none' stroke='%23ff2e6e' stroke-opacity='0.35' stroke-width='2'/><text x='100' y='120' font-size='62' font-family='Arial' font-weight='900' fill='%23ff2e6e' fill-opacity='0.6' text-anchor='middle'>M</text></svg>";
 
   function imgCandidates(primaryUrl){
@@ -1097,6 +1095,57 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     img.onerror = next;
     next();
+  }
+
+  // ===== ОТПРАВКА ЧЕРЕЗ НАТИВНУЮ HTML-ФОРМУ (fallback для мобильного VK) =====
+  function submitViaHTMLForm(data, onDone){
+    var iframeName = 'mrs_form_target_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    var iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.cssText = 'display:none;width:0;height:0;border:0;position:absolute;left:-9999px;';
+    document.body.appendChild(iframe);
+
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = FORMSPREE;
+    form.target = iframeName;
+    form.acceptCharset = 'UTF-8';
+    form.style.cssText = 'display:none;';
+
+    Object.keys(data).forEach(function(key){
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = data[key] == null ? '' : String(data[key]);
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+
+    var done = false;
+    function finalize(){
+      if (done) return;
+      done = true;
+      try { form.remove(); } catch(e){}
+      setTimeout(function(){ try { iframe.remove(); } catch(e){} }, 5000);
+      onDone();
+    }
+
+    // iframe.onload сработает, когда сервер вернёт ответ
+    iframe.onload = finalize;
+    // Страховка: если ответа нет через 6 сек — считаем, что ушло
+    setTimeout(finalize, 6000);
+
+    try {
+      form.submit();
+    } catch(e){
+      console.error('[form.submit] error:', e);
+      // Если и это не сработало — показываем ошибку
+      setTimeout(function(){
+        alert(t('errorSend'));
+        finalize();
+      }, 100);
+    }
   }
 
   var MYSEE_PRODUCTS = [
@@ -1178,7 +1227,6 @@ document.addEventListener('DOMContentLoaded',function(){
     { name:'MyWM [MWM 10+]', code:'MWM10+', price:215000, img:IMG_BASE+'mywmplus.jpg', noMemory:true, specs:[['Всё от MyWM [MWM 10]','+ функции ниже'],['Барабан','16 кг · нержавеющая сталь'],['Smart-аккумулятор','встроенная батарея высокой плотности'],['Автономность','1–2 полных цикла с подогревом и отжимом'],['При отключении','тихое уведомление + продолжение стирки'],['Энергосбережение','отключаются фоновые анимации, Magic Touch (кроме открытия), звуки'],['Приоритет','нагрев · мотор MR10 · насосы'],['По восстановлении','экран возвращает яркость · автозарядка после программы'],['Визуализация','анимация наполнения батареи в неоново-розовых тонах'],['Вежливый диалог','дружелюбное сообщение вместо ошибки'],['Отложенная стирка','автозапуск при 100% заряде + push-уведомление'],['Цвета','Ice White · Space Black']] }
   ];
 
-  // ВАЖНО: MyPK+ без img — будет показана SVG-заглушка
   var MYSEEPK_PRODUCTS = [
     { name:'MyPK30', code:'PK30', price:460980, img:IMG_BASE+'mypk30.jpg', noMemory:true, specs:[
       ['Процессор','Чип MЙ6 · 4-нм, 2-е поколение'],['CPU/GPU','10 ядер'],['Память','20 ГБ минимум · до 512 ГБ'],
@@ -1283,7 +1331,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
   function translateSpecKey(k){
     if (currentLang !== 'en') return k;
-    var map = {'Экран':'Display','Процессор':'Processor','Память':'Memory','Камеры':'Cameras','Батарея':'Battery','Корпус':'Body','Прочее':'Other','ОС':'OS','Толщина':'Thickness','Аккумулятор':'Battery','Защита':'Protection','Матрица':'Matrix','Яркость':'Brightness','Разрешение':'Resolution','Покрытие':'Coating','Звук':'Sound','Платформа':'Platform','Гейминг':'Gaming','Интерфейсы':'Interfaces','Разъёмы':'Ports','Дизайн':'Design','Сопроцессор':'Coprocessor','Дисплей':'Display','Связь':'Connectivity','ИИ':'AI','Зарядка':'Charging','Особенности':'Features','Нейропроцессор':'Neural processor','Нижний блок':'Bottom block','LED-лента':'LED strip','Беспроводная зарядка':'Wireless charging','Подставка':'Stand','Основной блок':'Main block','Мощность':'Power','НЧ-динамики':'Woofers','Широкополосные':'Full-range','Пассивные излучатели':'Passive radiators','Размеры':'Dimensions','Вес':'Weight','Материалы':'Materials','Мотор':'Motor','Анти-прыжок':'Anti-jump','Акустика':'Acoustics','Распознавание':'Recognition','Голос':'Voice','Magic Touch':'Magic Touch','Умное расписание':'Smart schedule','Барабан':'Drum','Расход воды':'Water use','Энергокласс':'Energy class','Цвета':'Colors','Гарантия':'Warranty','Smart-аккумулятор':'Smart battery','Автономность':'Autonomy','При отключении':'On power loss','Энергосбережение':'Power saving','Приоритет':'Priority','По восстановлении':'On restore','Визуализация':'Visualization','Вежливый диалог':'Polite dialog','Отложенная стирка':'Deferred wash','Всё от MyWM [MWM 10]':'All from MyWM [MWM 10]','CPU/GPU':'CPU/GPU','Камера':'Camera','Порты':'Ports','Статус':'Status','Трассировка':'Ray tracing','Накопитель':'Storage','Слоты':'Slots','Цвет':'Color','Конструкция':'Design','Управление':'Control','Стилус':'Stylus','Биометрия':'Biometrics','Клавиатура':'Keyboard','Габариты':'Dimensions','Технология':'Technology','Частота':'Refresh rate','RAM':'RAM','Зарядка':'Charging'};
+    var map = {'Экран':'Display','Процессор':'Processor','Память':'Memory','Камеры':'Cameras','Батарея':'Battery','Корпус':'Body','Прочее':'Other','ОС':'OS','Толщина':'Thickness','Аккумулятор':'Battery','Защита':'Protection','Матрица':'Matrix','Яркость':'Brightness','Разрешение':'Resolution','Покрытие':'Coating','Звук':'Sound','Платформа':'Platform','Гейминг':'Gaming','Интерфейсы':'Interfaces','Разъёмы':'Ports','Дизайн':'Design','Сопроцессор':'Coprocessor','Дисплей':'Display','Связь':'Connectivity','ИИ':'AI','Зарядка':'Charging','Особенности':'Features','Нейропроцессор':'Neural processor','Нижний блок':'Bottom block','LED-лента':'LED strip','Беспроводная зарядка':'Wireless charging','Подставка':'Stand','Основной блок':'Main block','Мощность':'Power','НЧ-динамики':'Woofers','Широкополосные':'Full-range','Пассивные излучатели':'Passive radiators','Размеры':'Dimensions','Вес':'Weight','Материалы':'Materials','Мотор':'Motor','Анти-прыжок':'Anti-jump','Акустика':'Acoustics','Распознавание':'Recognition','Голос':'Voice','Magic Touch':'Magic Touch','Умное расписание':'Smart schedule','Барабан':'Drum','Расход воды':'Water use','Энергокласс':'Energy class','Цвета':'Colors','Гарантия':'Warranty','Smart-аккумулятор':'Smart battery','Автономность':'Autonomy','При отключении':'On power loss','Энергосбережение':'Power saving','Приоритет':'Priority','По восстановлении':'On restore','Визуализация':'Visualization','Вежливый диалог':'Polite dialog','Отложенная стирка':'Deferred wash','Всё от MyWM [MWM 10]':'All from MyWM [MWM 10]','CPU/GPU':'CPU/GPU','Камера':'Camera','Порты':'Ports','Статус':'Status','Трассировка':'Ray tracing','Накопитель':'Storage','Слоты':'Slots','Цвет':'Color','Конструкция':'Design','Управление':'Control','Стилус':'Stylus','Биометрия':'Biometrics','Клавиатура':'Keyboard','Габариты':'Dimensions','Технология':'Technology','Частота':'Refresh rate','RAM':'RAM'};
     return map[k] || k;
   }
 
@@ -1382,7 +1430,6 @@ document.addEventListener('DOMContentLoaded',function(){
     var imageDiv = card.querySelector('.ms-product-image');
     var img = document.createElement('img');
     img.alt = p.name;
-    // MyPK+ (notForSale без img) — сразу заглушка. Остальные — обычная загрузка
     if (p.notForSale || !p.img) {
       img.src = PLACEHOLDER_IMG;
     } else {
@@ -1533,6 +1580,7 @@ document.addEventListener('DOMContentLoaded',function(){
       if (!email || !city || !street || !house){ alert(t('fillRequired')); return; }
       btnBuy.classList.add('loading');
       btnBuy.textContent = t('sending');
+
       var lines = cart.map(function(item){
         var memInfo;
         if (item.noMemory) memInfo = '—';
@@ -1543,6 +1591,7 @@ document.addEventListener('DOMContentLoaded',function(){
         var nameWithCode = item.code ? item.name+' ['+item.code+']' : item.name;
         return '• '+nameWithCode+' — '+memInfo+', '+t('colorValueUnit')+' '+item.config.colorName+' ('+item.config.colorValue+') — '+formatPrice(itemPrice(item));
       }).join('\n');
+
       var data = {
         _subject:(currentLang==='en'?'New order: ':'Новый заказ: ')+cart.length+' '+(currentLang==='en'?'item(s)':'тов.'),
         'Состав заказа':lines,
@@ -1553,9 +1602,48 @@ document.addEventListener('DOMContentLoaded',function(){
         'Город':city, 'Улица':street, 'Дом':house, 'Индекс':postal||'—',
         'Согласие на сбор данных':'Да'
       };
-      fetch(FORMSPREE,{ method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'}, body:JSON.stringify(data) })
-      .then(function(res){ if (!res.ok) throw new Error('HTTP '+res.status); cart.length = 0; updateNavCart(); renderCartContent(); showSuccessMulti(); })
-      .catch(function(err){ btnBuy.classList.remove('loading'); btnBuy.textContent = t('buyAllBtn'); alert(t('errorSend')+'\n\n'+err.message); });
+
+      var successShown = false;
+      function onSuccess(){
+        if (successShown) return;
+        successShown = true;
+        cart.length = 0;
+        updateNavCart();
+        renderCartContent();
+        showSuccessMulti();
+      }
+
+      // Пытаемся fetch с таймаутом 8 сек. Если не выходит — fallback на нативную форму.
+      var controller = null, timeoutId = null;
+      try {
+        if (typeof AbortController !== 'undefined'){
+          controller = new AbortController();
+          timeoutId = setTimeout(function(){
+            try { controller.abort(); } catch(e){}
+          }, 8000);
+        }
+      } catch(e){}
+
+      var fetchOpts = {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify(data)
+      };
+      if (controller) fetchOpts.signal = controller.signal;
+
+      fetch(FORMSPREE, fetchOpts)
+        .then(function(res){
+          if (timeoutId) clearTimeout(timeoutId);
+          if (!res.ok) throw new Error('HTTP '+res.status);
+          return res;
+        })
+        .then(function(){ onSuccess(); })
+        .catch(function(err){
+          if (timeoutId) clearTimeout(timeoutId);
+          console.warn('[Formspree] fetch failed → fallback to native form:', err);
+          // Fallback: нативная HTML-форма — работает в мобильном VK
+          submitViaHTMLForm(data, onSuccess);
+        });
     });
   }
 
@@ -1635,7 +1723,6 @@ document.addEventListener('DOMContentLoaded',function(){
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
-  // ===== ПРЕЛОАДЕР =====
   var preloader = document.getElementById('preloader');
   var barEl = preloader.querySelector('.preloader-bar');
   var pctEl = preloader.querySelector('.preloader-percent');
@@ -1717,7 +1804,6 @@ document.addEventListener('DOMContentLoaded',function(){
   function startApp(){ mainApp.style.display = ''; buildApp(); showPage('mysee'); }
   function rebuildApp(){ mainApp.style.display = ''; buildApp(); showPage('mysee'); }
 
-  // ===== НАСТРОЙКИ =====
   var settingsTitle = document.getElementById('settings-title');
   var settingsSub = document.getElementById('settings-sub');
   var settingsLangLabel = document.getElementById('settings-lang-label');
